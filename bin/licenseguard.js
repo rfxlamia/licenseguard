@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 const { program } = require('commander')
+const { version } = require('../package.json')
 const { runList } = require('../lib/commands/list')
 const { runInit } = require('../lib/commands/init')
 const { runInitFast } = require('../lib/commands/init-fast')
 const { setupCommand } = require('../lib/commands/setup')
 
 program
-  .version('1.1.0')
+  .version(version)
   .description('License setup & compliance helper for developers')
 
 program
