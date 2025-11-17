@@ -1,9 +1,7 @@
 # LicenseGuard
 
-[![npm version](https://badge.fury.io/js/licenseguard-cli.svg)](https://badge.fury.io/js/licenseguard-cli)
-[![Build Status](https://github.com/rfxlamia/licenseguard/workflows/Test/badge.svg)](https://github.com/rfxlamia/licenseguard/actions)
-[![Coverage Status](https://codecov.io/gh/rfxlamia/licenseguard/branch/main/graph/badge.svg)](https://codecov.io/gh/rfxlamia/licenseguard)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ [![npm version](https://badge.fury.io/js/licenseguard-cli.svg)](https://npmjs.com/package/licenseguard-cli) 
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **License setup & compliance helper for developers**
 
