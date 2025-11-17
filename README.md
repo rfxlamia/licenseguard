@@ -1,8 +1,8 @@
 # LicenseGuard
 
 [![npm version](https://badge.fury.io/js/licenseguard-cli.svg)](https://badge.fury.io/js/licenseguard-cli)
-[![Build Status](https://github.com/your-username/licenseguard/workflows/Test/badge.svg)](https://github.com/your-username/licenseguard/actions)
-[![Coverage Status](https://codecov.io/gh/your-username/licenseguard/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/licenseguard)
+[![Build Status](https://github.com/rfxlamia/licenseguard/workflows/Test/badge.svg)](https://github.com/rfxlamia/licenseguard/actions)
+[![Coverage Status](https://codecov.io/gh/rfxlamia/licenseguard/branch/main/graph/badge.svg)](https://codecov.io/gh/rfxlamia/licenseguard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **License setup & compliance helper for developers**
@@ -221,7 +221,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/licenseguard.git
+git clone https://github.com/rfxlamia/licenseguard.git
 cd licenseguard
 
 # Install dependencies
@@ -254,5 +254,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Links:**
 - [Choose a License](https://choosealicense.com) - Help choosing the right license
 - [Open Source Initiative](https://opensource.org/licenses) - OSI-approved licenses
-- [GitHub Repository](https://github.com/your-username/licenseguard) - Source code
+- [GitHub Repository](https://github.com/rfxlamia/licenseguard) - Source code
 - [npm Package](https://www.npmjs.com/package/licenseguard-cli) - npm registry
