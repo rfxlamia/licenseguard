@@ -1,0 +1,20 @@
+# Development artifacts
+.bmad/
+.claude/
+.github/
+docs/
+tests/
+coverage/
+
+# Config files
+.eslintrc.json
+.prettierrc
+jest.config.js
+.licenseguardrc
+
+# Other
+*.md
+!README.md
+node_modules/
+*.tgz
+.git/
