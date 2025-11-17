@@ -1,129 +1,66 @@
 # LicenseGuard
 
-[![npm version](https://badge.fury.io/js/licenseguard-cli.svg)](https://www.npmjs.com/package/licenseguard-cli)
+[![npm version](https://badge.fury.io/js/licenseguard-cli.svg)](https://badge.fury.io/js/licenseguard-cli)
+[![Build Status](https://github.com/your-username/licenseguard/workflows/Test/badge.svg)](https://github.com/your-username/licenseguard/actions)
+[![Coverage Status](https://codecov.io/gh/your-username/licenseguard/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/licenseguard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> License setup & compliance helper for developers
+**License setup & compliance helper for developers**
 
-LicenseGuard helps you set up open source licenses and automatically notifies developers about licensing requirements when they clone any repository - **works with any language** (Node.js, Python, Rust, Go, etc.).
-
-## Key Features
-
-- **Automatic notifications** - See license info immediately after `git clone`
-- **Zero effort** - Global hooks install once, work forever
-- **Language agnostic** - Works for Python, Rust, Go, Ruby, any project
-- **Non-blocking** - Informational only, never blocks git operations
-- **Offline** - All license templates bundled, no internet required
-
----
+LicenseGuard is a CLI tool that helps you quickly set up open source licenses for your projects with automatic git hooks that notify your team about licensing requirements.
 
 ## Quick Start
 
-### For Developers (One-time Setup)
-
 ```bash
-npm install -g licenseguard-cli
+# Step 1: Run the interactive setup
+npx licenseguard-cli --init
+
+# Step 2: Answer the prompts (license type, owner name, year)
+
+# Step 3: Done! Your LICENSE file and git hooks are ready
 ```
 
-That's it! Now every time you clone a repo with `.licenseguardrc`, you'll see:
+That's it! Your project now has:
+- A properly formatted LICENSE file
+- A `.licenseguardrc` configuration file
+- Git hooks that display license reminders (optional)
 
-```bash
-git clone https://github.com/some/project
-# 📜 This project uses MIT License by ProjectOwner
-```
+## Installation
 
-### For Project Owners
-
-```bash
-cd your-project
-licenseguard --init
-```
-
-Follow the prompts, then commit:
-
-```bash
-git add LICENSE .licenseguardrc
-git commit -m "Add license"
-git push
-```
-
-Anyone who has LicenseGuard installed globally will now see your license info when they clone.
-
----
-
-## How It Works
-
-### Automatic Global Hooks
-
-When you install LicenseGuard globally, it automatically:
-
-1. Creates git template directory at `~/.git-templates/hooks/`
-2. Installs self-contained hooks (only needs Node.js, not LicenseGuard)
-3. Configures git: `git config --global init.templateDir ~/.git-templates`
-
-Now **every** `git clone` or `git init` copies these hooks automatically.
-
-The hooks check for `.licenseguardrc` and display license info if found:
-
-```bash
-git clone <any-repo>
-# If .licenseguardrc exists:
-# 📜 This project uses MIT License by OwnerName
-
-git checkout feature-branch
-# 📜 This project uses MIT License by OwnerName
-
-git commit -m "changes"
-# ℹ️  Reminder: This project is licensed under MIT
-```
-
----
-
-## Installation Options
-
-### Global (Recommended)
-
-```bash
-npm install -g licenseguard-cli
-```
-
-Enables automatic license notifications for all git operations.
-
-### Using npx (No install)
-
+### Using npx (Recommended)
 ```bash
 npx licenseguard-cli --init
 ```
 
-One-time use without global install (no automatic notifications).
-
-### Local Development Dependency
-
+### Global Installation
 ```bash
-npm install --save-dev licenseguard-cli
+npm install -g licenseguard-cli
+licenseguard --init
 ```
 
-For use in npm scripts (see Advanced Usage).
+### Local Installation
+```bash
+npm install --save-dev licenseguard-cli
+npx licenseguard-cli --init
+```
 
----
+## Usage
 
-## Commands
-
-### `--init` - Interactive Setup
+### Interactive Setup (`--init`)
 
 ```bash
 licenseguard --init
 ```
 
-Guides you through:
-1. Selecting license type (MIT, Apache 2.0, GPL 3.0, etc.)
-2. Copyright owner name
-3. Copyright year (defaults to current)
-4. Project URL (optional)
-5. Git initialization (if needed)
-6. Git hooks installation
+This command guides you through:
+1. Selecting a license type
+2. Entering your copyright owner name
+3. Setting the copyright year (defaults to current year)
+4. Adding a project URL (optional)
+5. Optionally initializing git if not already a repo
+6. Installing git hooks for license notifications
 
-Example:
+**Example Output:**
 ```
 📜 LicenseGuard - Interactive License Setup
 
@@ -139,38 +76,39 @@ Example:
 📄 Your project is now licensed under MIT
 ```
 
-### `--init-fast` - Non-Interactive Setup
+### Fast Setup (`--init-fast`)
 
 ```bash
 licenseguard --init-fast --license mit --owner "Your Name"
 ```
 
-Perfect for CI/CD or scripting. Flags:
+Non-interactive setup with flags. Perfect for CI/CD or scripting.
 
-- `--license <type>` (required) - License type
-- `--owner <name>` (optional) - Auto-detects from git config
-- `--year <year>` (optional) - Defaults to current year
-- `--url <url>` (optional) - Auto-detects from git remote
+**Available Flags:**
+- `--license <type>` (required) - License type to use
+- `--owner <name>` (optional) - Copyright owner (auto-detects from git config)
+- `--year <year>` (optional) - Copyright year (defaults to current year)
+- `--url <url>` (optional) - Project URL (auto-detects from git remote)
 
-Examples:
+**Examples:**
 ```bash
-# Minimal
+# Minimal (auto-detects owner from git config)
 licenseguard --init-fast --license mit
 
 # Full specification
-licenseguard --init-fast --license apache2_0 --owner "Apache Corp" --year 2025
+licenseguard --init-fast --license apache2_0 --owner "Apache Corp" --year 2025 --url "https://apache.org"
 
 # GPL license
 licenseguard --init-fast --license gpl3_0 --owner "Free Software Foundation"
 ```
 
-### `--ls` - List Available Licenses
+### List Available Licenses (`--ls`)
 
 ```bash
 licenseguard --ls
 ```
 
-Output:
+Displays all available license types:
 ```
 Available License Templates:
 
@@ -182,34 +120,22 @@ Available License Templates:
 ✓ WTFPL - Do What The F*ck You Want To Public License (ultra-permissive)
 ```
 
-### `--setup` - Setup Hooks Only
+## Available Licenses
 
-```bash
-licenseguard --setup
-```
+| License Key | Display Name | Description |
+|-------------|--------------|-------------|
+| `mit` | MIT | MIT License (permissive, widely used) |
+| `apache2_0` | Apache 2.0 | Apache License 2.0 (permissive with patent grant) |
+| `gpl3_0` | GPL 3.0 | GNU General Public License 3.0 (copyleft) |
+| `bsd3clause` | BSD 3-Clause | BSD 3-Clause License (permissive with attribution) |
+| `isc` | ISC | ISC License (simpler MIT alternative) |
+| `wtfpl` | WTFPL | Do What The F*ck You Want To Public License (ultra-permissive) |
 
-Reads existing `.licenseguardrc` and installs hooks. Used in npm prepare scripts.
-
----
-
-## Supported Licenses
-
-| Key | Name | Description |
-|-----|------|-------------|
-| `mit` | MIT | Permissive, widely used |
-| `apache2_0` | Apache 2.0 | Permissive with patent grant |
-| `gpl3_0` | GPL 3.0 | Copyleft |
-| `bsd3clause` | BSD 3-Clause | Permissive with attribution |
-| `isc` | ISC | Simpler MIT alternative |
-| `wtdpl` | WTFPL | Ultra-permissive |
-
-Not sure which to choose? Visit [choosealicense.com](https://choosealicense.com).
-
----
+Not sure which license to choose? Visit [choosealicense.com](https://choosealicense.com) for guidance.
 
 ## Configuration
 
-LicenseGuard creates `.licenseguardrc` in your project root:
+LicenseGuard creates a `.licenseguardrc` file in your project root:
 
 ```json
 {
@@ -220,20 +146,40 @@ LicenseGuard creates `.licenseguardrc` in your project root:
 }
 ```
 
-This file **must be committed** to your repository so others can see your license info.
+This configuration is used by the git hooks to display license information.
 
----
+## Git Hooks
 
-## Advanced Usage
+LicenseGuard installs two informational git hooks:
 
-### For npm Projects (Alternative to Global Install)
+### Post-Checkout Hook
+Displays a notification after `git checkout` or branch switches:
+```
+📜 This project uses MIT License by Your Name
+```
 
-If you can't rely on developers having LicenseGuard installed globally, use npm prepare script:
+### Pre-Commit Hook
+Displays a reminder before each commit:
+```
+ℹ️ Reminder: This project is licensed under MIT
+```
 
+**Important:**
+- Hooks are **educational only** - they never block git operations
+- Hooks always exit with code 0 (success)
+- If `.licenseguardrc` is missing, hooks silently exit
+
+### Auto-Setup on Clone (npm projects)
+
+Git hooks live in `.git/hooks/` which is **not tracked by git**. This means hooks are not copied when someone clones your repository.
+
+For npm projects, you can use the `prepare` script to automatically set up hooks when developers run `npm install`:
+
+**Add to your package.json:**
 ```json
 {
   "devDependencies": {
-    "licenseguard-cli": "^1.2.0"
+    "licenseguard-cli": "^1.1.0"
   },
   "scripts": {
     "prepare": "licenseguard --setup || true"
@@ -241,100 +187,107 @@ If you can't rely on developers having LicenseGuard installed globally, use npm 
 }
 ```
 
-When developers run `npm install`, hooks are set up automatically.
+**What happens when someone clones your project:**
+```bash
+git clone <your-repo>       # Gets code + .licenseguardrc
+npm install                 # AUTOMATICALLY:
+                           # 📜 "This project uses MIT License by Your Name"
+                           # ✓ Git hooks installed
+git checkout feature        # Notification appears (hooks active)
+git commit                  # Reminder appears (hooks active)
+```
 
-### Existing Git Hooks
+The `--setup` command:
+- Reads `.licenseguardrc` and displays license notification
+- Installs git hooks automatically
+- Always exits 0 (never breaks `npm install`)
+- Safe to run multiple times (idempotent)
 
-LicenseGuard **never overwrites** existing hooks. If conflicts exist:
+### Existing Hooks
 
-- Creates `licenseguard-post-checkout` and `licenseguard-pre-commit`
-- Shows warning with merge instructions
+If you already have git hooks, LicenseGuard will NOT overwrite them. Instead, it creates variants:
+- `.git/hooks/licenseguard-pre-commit`
+- `.git/hooks/licenseguard-post-checkout`
 
-### Non-Git Projects
+You can manually merge these with your existing hooks if desired.
 
-LicenseGuard works without git:
-- `--init` offers to run `git init`
-- `--init-fast` creates LICENSE file only
-- Hooks are skipped with warning
+### Without Git
 
----
+If your project is not a git repository:
+- Interactive mode (`--init`) will offer to run `git init`
+- Fast mode (`--init-fast`) will skip hooks and warn you
+- `--setup` command will skip hooks with a warning
+- LICENSE file is always created regardless of git status
 
 ## FAQ
 
-### Does this work for non-JavaScript projects?
-
-**Yes!** LicenseGuard works for any project:
-- Python projects
-- Rust/Cargo projects
-- Go modules
-- Ruby gems
-- Any language
-
-The hooks only need Node.js installed (which most developers have).
-
-### Do my contributors need to install LicenseGuard?
-
-For automatic notifications: **Yes**, they need `npm install -g licenseguard-cli` once.
-
-Alternative: Use npm prepare script (see Advanced Usage) - then only project owner installs.
-
 ### Does this work offline?
+Yes! LicenseGuard is completely offline. All license templates are bundled with the package.
 
-Yes! All license templates are bundled. No internet required.
-
-### Can I disable notifications?
-
-Delete hooks from `.git/hooks/`:
-```bash
-rm .git/hooks/post-checkout .git/hooks/pre-commit
-```
-
-Or remove global hooks:
-```bash
-rm -rf ~/.git-templates/hooks/
-git config --global --unset init.templateDir
-```
-
-### What Node.js versions work?
-
-Node.js 18.x or 20.x (LTS versions).
+### Can I use custom licenses?
+Currently, LicenseGuard supports the 6 most common open source licenses. Custom license support may be added in future versions.
 
 ### Does it work on Windows?
+Yes! LicenseGuard is fully cross-platform and works on Linux, macOS, and Windows.
 
-Yes! Fully cross-platform (Linux, macOS, Windows).
+### What if I already have a LICENSE file?
+Interactive mode will ask if you want to overwrite it. Fast mode will overwrite without asking.
 
----
+### How do I update my license?
+Run `licenseguard --init` again and it will regenerate your LICENSE file.
 
-## Why LicenseGuard?
+### Can I disable the git hooks?
+The hooks are informational only and don't block anything. If you don't want them, simply delete the hook files from `.git/hooks/`.
 
-- **Not enforcing** - Unlike license scanners, we inform and educate
-- **Zero friction** - One global install, automatic forever
-- **Universal** - Works with any language/framework
-- **Educational** - Raises awareness without blocking workflows
-- **Open source** - MIT licensed, free forever
-
----
+### What Node.js versions are supported?
+LicenseGuard requires Node.js 18.x or 20.x (LTS versions).
 
 ## Contributing
 
-Contributions welcome!
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push: `git push origin feature/amazing`
-5. Open Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
----
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/licenseguard.git
+cd licenseguard
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Test locally
+npm link
+cd /tmp && mkdir test-project && cd test-project
+licenseguard --init
+```
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## Links
-
-- [npm Package](https://www.npmjs.com/package/licenseguard-cli)
-- [Choose a License](https://choosealicense.com)
-- [Open Source Initiative](https://opensource.org/licenses)
+**Links:**
+- [Choose a License](https://choosealicense.com) - Help choosing the right license
+- [Open Source Initiative](https://opensource.org/licenses) - OSI-approved licenses
+- [GitHub Repository](https://github.com/your-username/licenseguard) - Source code
+- [npm Package](https://www.npmjs.com/package/licenseguard-cli) - npm registry
