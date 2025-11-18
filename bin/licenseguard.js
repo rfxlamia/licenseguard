@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { program } = require('commander')
+const chalk = require('chalk')
 const { version } = require('../package.json')
 const { runList } = require('../lib/commands/list')
 const { runInit } = require('../lib/commands/init')
@@ -9,44 +10,61 @@ const { setupCommand } = require('../lib/commands/setup')
 
 program
   .version(version)
-  .description('License setup & compliance helper for developers')
+  .description('License setup & compliance guard for developers')
 
+// Init command with subcommand-specific options
 program
-  .option('--init', 'Interactive license setup wizard')
-  .option('--init-fast', 'Non-interactive fast setup')
-  .option('--license <type>', 'License type (for --init-fast)')
-  .option('--owner <name>', 'Copyright owner name (for --init-fast)')
-  .option('--year <year>', 'Copyright year (for --init-fast)')
-  .option('--url <url>', 'Project URL (for --init-fast)')
-  .option('--ls', 'List available license templates')
-  .option(
-    '--setup',
-    'Setup license notification and install git hooks (for npm prepare script)'
-  )
-  .parse(process.argv)
+  .command('init')
+  .description('Interactive license setup with dependency scanning')
+  .option('--force', 'Create LICENSE despite conflicts')
+  .option('--noscan', 'Skip dependency scanning')
+  .option('--fast', 'Non-interactive mode with auto-detection')
+  .option('--license <type>', 'License type (for --fast mode)')
+  .option('--owner <name>', 'Copyright owner name (for --fast mode)')
+  .option('--year <year>', 'Copyright year (for --fast mode)')
+  .option('--url <url>', 'Project URL (for --fast mode)')
+  .action(async (options) => {
+    try {
+      if (options.fast) {
+        await runInitFast(options)
+      } else {
+        await runInit(options)
+      }
+    } catch (error) {
+      console.error(chalk.red('✗ Error:'), error.message)
+      process.exit(1)
+    }
+  })
 
-const options = program.opts()
+// List command
+program
+  .command('ls')
+  .description('List available license templates')
+  .action(async () => {
+    try {
+      await runList()
+    } catch (error) {
+      console.error(chalk.red('✗ Error:'), error.message)
+      process.exit(1)
+    }
+  })
 
-if (options.init) {
-  runInit().catch((err) => {
-    console.error('Error:', err.message)
-    process.exit(1)
+// Setup command (kept for npm prepare script compatibility)
+program
+  .command('setup')
+  .description('Setup license notification and install git hooks (for npm prepare script)')
+  .action(async () => {
+    try {
+      await setupCommand()
+    } catch (error) {
+      // Even on error, don't exit 1 - npm prepare compatibility
+      console.error(chalk.yellow('⚠️  Setup warning:'), error.message)
+    }
   })
-} else if (options.initFast) {
-  runInitFast(options).catch((err) => {
-    console.error('Error:', err.message)
-    process.exit(1)
-  })
-} else if (options.ls) {
-  runList().catch((err) => {
-    console.error('Error:', err.message)
-    process.exit(1)
-  })
-} else if (options.setup) {
-  setupCommand().catch((err) => {
-    // Even on error, don't exit 1 - npm prepare compatibility
-    console.error('Setup warning:', err.message)
-  })
-} else {
+
+program.parse(process.argv)
+
+// Show help if no command provided
+if (!process.argv.slice(2).length) {
   program.help()
 }

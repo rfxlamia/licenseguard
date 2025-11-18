@@ -1,6 +1,4 @@
 # Development artifacts
-.bmad/
-.claude/
 .github/
 docs/
 tests/

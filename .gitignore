@@ -2,3 +2,15 @@ node_modules/
 coverage/
 .DS_Store
 *.log
+
+# Development artifacts
+.github/
+docs/
+tests/
+coverage/
+
+# Config files
+.eslintrc.json
+.prettierrc
+jest.config.js
+.licenseguardrc

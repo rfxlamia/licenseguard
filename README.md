@@ -3,16 +3,19 @@
 [![npm version](https://badge.fury.io/js/licenseguard-cli.svg)](https://www.npmjs.com/package/licenseguard-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> License setup & compliance helper for developers
+> License setup & compliance guard for developers
 
-LicenseGuard helps you set up open source licenses and automatically notifies developers about licensing requirements when they clone any repository - **works with any language** (Node.js, Python, Rust, Go, etc.).
+LicenseGuard helps you set up open source licenses and protects your project from license conflicts. It scans your dependencies for incompatible licenses and automatically notifies developers about licensing requirements - works with any language (Node.js, Python, Rust, Go, etc.).
 
 ## Key Features
 
-- **Automatic notifications** - See license info immediately after `git clone`
-- **Zero effort** - Global hooks install once, work forever
-- **Language agnostic** - Works for Python, Rust, Go, Ruby, any project
-- **Non-blocking** - Informational only, never blocks git operations
+- **Dependency Scanning** - Scans npm dependencies for license conflicts during setup
+- **Conflict Detection** - Detects incompatible licenses (e.g., GPL vs MIT) and blocks creation
+- **SPDX Compatibility** - Industry-standard license compatibility checking
+- **Scan Results** - Save scan results to `.licenseguardrc` for transparency
+- **Automatic Notifications** - See license info immediately after `git clone`
+- **Zero Effort** - Global hooks install once, work forever
+- **Language Agnostic** - Works for Python, Rust, Go, Ruby, any project
 - **Offline** - All license templates bundled, no internet required
 
 ---
@@ -36,7 +39,7 @@ git clone https://github.com/some/project
 
 ```bash
 cd your-project
-licenseguard --init
+licenseguard init
 ```
 
 Follow the prompts, then commit:
@@ -92,7 +95,7 @@ Enables automatic license notifications for all git operations.
 ### Using npx (No install)
 
 ```bash
-npx licenseguard-cli --init
+npx licenseguard-cli init
 ```
 
 One-time use without global install (no automatic notifications).
@@ -109,10 +112,10 @@ For use in npm scripts (see Advanced Usage).
 
 ## Commands
 
-### `--init` - Interactive Setup
+### `init` - Interactive Setup
 
 ```bash
-licenseguard --init
+licenseguard init
 ```
 
 Guides you through:
@@ -120,10 +123,12 @@ Guides you through:
 2. Copyright owner name
 3. Copyright year (defaults to current)
 4. Project URL (optional)
-5. Git initialization (if needed)
-6. Git hooks installation
+5. Dependency scanning for license conflicts
+6. Option to save scan results
+7. Git initialization (if needed)
+8. Git hooks installation
 
-Example:
+Example (with clean dependencies):
 ```
 📜 LicenseGuard - Interactive License Setup
 
@@ -132,42 +137,88 @@ Example:
 ? Copyright year: 2025
 ? Project URL (optional): https://github.com/you/project
 
+🔍 Scanning dependencies for license conflicts...
+
+✓ Scan complete - 150 dependencies checked
+  ✓ 150 compatible
+  ✓ 0 incompatible
+  ✓ 0 unknown
+
+? Save scan results to .licenseguardrc? Yes
+
 ✓ LICENSE file created
+✓ Scan results saved to .licenseguardrc
 ✓ Configuration saved to .licenseguardrc
 ✓ Git hooks installed
 
 📄 Your project is now licensed under MIT
 ```
 
-### `--init-fast` - Non-Interactive Setup
+Example (with conflicts):
+```
+🔍 Scanning dependencies for license conflicts...
 
-```bash
-licenseguard --init-fast --license mit --owner "Your Name"
+✗ Scan complete - 150 dependencies checked
+  ✓ 147 compatible
+  ❌ 2 incompatible
+  ⚠️ 1 unknown
+
+⚠️ CONFLICTS DETECTED:
+
+❌ some-gpl-lib@2.0.0 (GPL-3.0)
+   Conflict: Copyleft incompatible with MIT
+   Location: node_modules/some-gpl-lib/package.json
+
+✗ LICENSE NOT created due to license conflicts.
+
+Fix conflicts or use --force to proceed anyway:
+  licenseguard init --force
 ```
 
-Perfect for CI/CD or scripting. Flags:
+**Flags:**
+- `--force` - Create LICENSE despite conflicts (shows warnings)
+- `--noscan` - Skip dependency scanning
 
+### `init --fast` - Non-Interactive Setup
+
+```bash
+licenseguard init --fast --license mit --owner "Your Name"
+```
+
+Perfect for CI/CD or scripting. Automatically scans dependencies and auto-saves clean results.
+
+**Flags:**
+- `--fast` - Enable non-interactive mode
 - `--license <type>` (required) - License type
 - `--owner <name>` (optional) - Auto-detects from git config
 - `--year <year>` (optional) - Defaults to current year
 - `--url <url>` (optional) - Auto-detects from git remote
+- `--force` - Create LICENSE despite conflicts
+- `--noscan` - Skip dependency scanning
+
+**Auto-save behavior in fast mode:**
+- Clean scan (no conflicts) → Automatically saves `scanResult`
+- Conflicts detected → Does not save `scanResult`
 
 Examples:
 ```bash
 # Minimal
-licenseguard --init-fast --license mit
+licenseguard init --fast --license mit
+
+# Skip scanning
+licenseguard init --fast --license mit --noscan
+
+# Force creation despite conflicts
+licenseguard init --fast --license mit --force
 
 # Full specification
-licenseguard --init-fast --license apache2_0 --owner "Apache Corp" --year 2025
-
-# GPL license
-licenseguard --init-fast --license gpl3_0 --owner "Free Software Foundation"
+licenseguard init --fast --license apache2_0 --owner "Apache Corp" --year 2025
 ```
 
-### `--ls` - List Available Licenses
+### `ls` - List Available Licenses
 
 ```bash
-licenseguard --ls
+licenseguard ls
 ```
 
 Output:
@@ -182,10 +233,10 @@ Available License Templates:
 ✓ WTFPL - Do What The F*ck You Want To Public License (ultra-permissive)
 ```
 
-### `--setup` - Setup Hooks Only
+### `setup` - Setup Hooks Only
 
 ```bash
-licenseguard --setup
+licenseguard setup
 ```
 
 Reads existing `.licenseguardrc` and installs hooks. Used in npm prepare scripts.
@@ -201,7 +252,7 @@ Reads existing `.licenseguardrc` and installs hooks. Used in npm prepare scripts
 | `gpl3_0` | GPL 3.0 | Copyleft |
 | `bsd3clause` | BSD 3-Clause | Permissive with attribution |
 | `isc` | ISC | Simpler MIT alternative |
-| `wtdpl` | WTFPL | Ultra-permissive |
+| `wtfpl` | WTFPL | Ultra-permissive |
 
 Not sure which to choose? Visit [choosealicense.com](https://choosealicense.com).
 
@@ -209,8 +260,9 @@ Not sure which to choose? Visit [choosealicense.com](https://choosealicense.com)
 
 ## Configuration
 
-LicenseGuard creates `.licenseguardrc` in your project root:
+LicenseGuard creates `.licenseguardrc` in your project root.
 
+**Basic format:**
 ```json
 {
   "license": "mit",
@@ -219,6 +271,30 @@ LicenseGuard creates `.licenseguardrc` in your project root:
   "url": "https://github.com/you/project"
 }
 ```
+
+**With scan results (optional):**
+```json
+{
+  "license": "mit",
+  "owner": "Your Name",
+  "year": "2025",
+  "url": "https://github.com/you/project",
+  "scanResult": {
+    "timestamp": "2025-11-18T10:30:00.000Z",
+    "totalDependencies": 150,
+    "compatible": 150,
+    "incompatible": 0,
+    "unknown": 0,
+    "issues": []
+  }
+}
+```
+
+**Why save scan results?**
+- **Transparency badge** - Shows your project has validated license compliance
+- **Trust signal** - Like CI badges or test coverage badges
+- **Audit trail** - Documents when dependencies were last checked
+- **Open source best practice** - Demonstrates license awareness
 
 This file **must be committed** to your repository so others can see your license info.
 
@@ -233,10 +309,10 @@ If you can't rely on developers having LicenseGuard installed globally, use npm 
 ```json
 {
   "devDependencies": {
-    "licenseguard-cli": "^1.2.0"
+    "licenseguard-cli": "^2.0.0"
   },
   "scripts": {
-    "prepare": "licenseguard --setup || true"
+    "prepare": "licenseguard setup || true"
   }
 }
 ```
@@ -253,13 +329,52 @@ LicenseGuard **never overwrites** existing hooks. If conflicts exist:
 ### Non-Git Projects
 
 LicenseGuard works without git:
-- `--init` offers to run `git init`
-- `--init-fast` creates LICENSE file only
+- `init` offers to run `git init`
+- `init --fast` creates LICENSE file only
 - Hooks are skipped with warning
 
 ---
 
 ## FAQ
+
+### What licenses are checked during scanning?
+
+Scans **npm dependencies only** (reads `package.json` and `node_modules`). It checks:
+- SPDX license identifiers (MIT, Apache-2.0, GPL-3.0, BSD-3-Clause, ISC, etc.)
+- License compatibility using industry-standard rules
+- Copyleft vs permissive conflicts (e.g., GPL incompatible with MIT)
+
+For non-JavaScript projects, use `--noscan` flag.
+
+### How does SPDX compatibility work?
+
+LicenseGuard uses [spdx-satisfies](https://www.npmjs.com/package/spdx-satisfies) for compatibility checking:
+- **Permissive licenses** (MIT, Apache, BSD, ISC) - Compatible with most licenses
+- **Copyleft licenses** (GPL-3.0) - Incompatible with permissive project licenses
+- **Unknown licenses** - Generates warnings but doesn't block
+- **Custom rules** - Fallback for non-SPDX licenses (WTFPL, proprietary)
+
+### What is the scanResult for?
+
+`scanResult` is optional transparency data you can commit to show:
+1. Your project has validated license compliance
+2. When dependencies were last scanned
+3. What conflicts (if any) were detected
+4. Trust signal for users and contributors (like CI badges)
+
+You choose whether to save it after each scan. Clean scans default to YES, conflicts default to NO.
+
+### Can I skip dependency scanning?
+
+Yes! Use the `--noscan` flag:
+```bash
+licenseguard init --noscan
+```
+
+This is useful for:
+- Non-JavaScript projects
+- Projects without dependencies
+- When you want manual license management
 
 ### Does this work for non-JavaScript projects?
 
