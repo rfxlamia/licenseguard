@@ -4,6 +4,7 @@
  */
 
 const fs = require('fs')
+const path = require('path')
 const {
   scanDependencies,
   parsePackageJson,
@@ -86,7 +87,7 @@ describe('extractLicense', () => {
     expect(result.name).toBe('express')
     expect(result.version).toBe('4.18.2')
     expect(result.license).toBe('MIT')
-    expect(result.path).toBe('node_modules/express/package.json')
+    expect(result.path).toBe(path.join('node_modules', 'express', 'package.json'))
   })
 
   it('should handle missing license field as UNKNOWN', () => {
@@ -373,7 +374,7 @@ describe('displayConflictReport', () => {
           license: 'GPL-3.0',
           type: 'conflict',
           reason: 'Copyleft incompatible with MIT',
-          location: 'node_modules/gpl-package/package.json'
+          location: path.join('node_modules', 'gpl-package', 'package.json')
         }
       ]
     }
@@ -397,7 +398,7 @@ describe('displayConflictReport', () => {
           license: 'UNKNOWN',
           type: 'warning',
           reason: 'No license field found',
-          location: 'node_modules/unknown-package/package.json'
+          location: path.join('node_modules', 'unknown-package', 'package.json')
         }
       ]
     }
@@ -421,14 +422,14 @@ describe('displayConflictReport', () => {
           license: 'GPL-3.0',
           type: 'conflict',
           reason: 'Copyleft incompatible',
-          location: 'node_modules/gpl-package/package.json'
+          location: path.join('node_modules', 'gpl-package', 'package.json')
         },
         {
           package: 'unknown-package@1.0.0',
           license: 'UNKNOWN',
           type: 'warning',
           reason: 'No license field',
-          location: 'node_modules/unknown-package/package.json'
+          location: path.join('node_modules', 'unknown-package', 'package.json')
         }
       ]
     }

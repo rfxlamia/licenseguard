@@ -4,6 +4,7 @@
  */
 
 const fs = require('fs')
+const path = require('path')
 const {
   detect,
   scanDependencies,
@@ -107,7 +108,7 @@ describe('Node.js Plugin', () => {
       expect(result.name).toBe('express')
       expect(result.version).toBe('4.18.2')
       expect(result.license).toBe('MIT')
-      expect(result.path).toBe('node_modules/express/package.json')
+      expect(result.path).toBe(path.join('node_modules', 'express', 'package.json'))
     })
 
     it('should handle missing license field as UNKNOWN', () => {
