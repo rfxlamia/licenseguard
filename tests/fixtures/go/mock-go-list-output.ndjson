@@ -1,0 +1,9 @@
+{"Path":"github.com/example/testproject","Main":true,"Dir":"/home/user/projects/testproject","GoMod":"/home/user/projects/testproject/go.mod","GoVersion":"1.21"}
+{"Path":"github.com/gin-gonic/gin","Version":"v1.9.1","Time":"2023-07-18T03:07:47Z","Dir":"/home/user/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1"}
+{"Path":"github.com/stretchr/testify","Version":"v1.8.4","Time":"2023-05-23T21:30:21Z","Dir":"/home/user/go/pkg/mod/github.com/stretchr/testify@v1.8.4"}
+{"Path":"github.com/spf13/cobra","Version":"v1.7.0","Time":"2023-03-17T15:29:12Z","Dir":"/home/user/go/pkg/mod/github.com/spf13/cobra@v1.7.0"}
+{"Path":"github.com/sirupsen/logrus","Version":"v1.9.3","Time":"2023-05-28T16:12:33Z","Dir":"/home/user/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3"}
+{"Path":"github.com/gpl-project/gplv3-lib","Version":"v1.0.0","Time":"2023-01-15T10:00:00Z","Dir":"/home/user/go/pkg/mod/github.com/gpl-project/gplv3-lib@v1.0.0"}
+{"Path":"github.com/gin-contrib/sse","Version":"v0.1.0","Time":"2019-04-29T09:47:14Z","Dir":"/home/user/go/pkg/mod/github.com/gin-contrib/sse@v0.1.0"}
+{"Path":"github.com/go-playground/validator/v10","Version":"v10.14.0","Time":"2023-05-09T17:55:05Z","Dir":"/home/user/go/pkg/mod/github.com/go-playground/validator/v10@v10.14.0"}
+{"Path":"golang.org/x/sys","Version":"v0.8.0","Time":"2023-04-26T17:51:17Z","Dir":"/home/user/go/pkg/mod/golang.org/x/sys@v0.8.0"}

@@ -6,7 +6,6 @@ coverage/
 # Development artifacts
 .github/
 docs/
-tests/
 coverage/
 
 # Config files

@@ -1,0 +1,35 @@
+{
+  "packages": [
+    {
+      "name": "test-rust-project",
+      "version": "0.1.0",
+      "id": "test-rust-project 0.1.0 (path+file:///test)",
+      "license": "MIT",
+      "license_file": null,
+      "source": null,
+      "manifest_path": "/test/Cargo.toml"
+    },
+    {
+      "name": "mit-crate",
+      "version": "1.0.0",
+      "id": "mit-crate 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT",
+      "license_file": null,
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest_path": "/home/user/.cargo/registry/src/mit-crate-1.0.0/Cargo.toml"
+    },
+    {
+      "name": "gpl-crate",
+      "version": "2.0.0",
+      "id": "gpl-crate 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "GPL-3.0",
+      "license_file": null,
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest_path": "/home/user/.cargo/registry/src/gpl-crate-2.0.0/Cargo.toml"
+    }
+  ],
+  "resolve": {
+    "root": "test-rust-project 0.1.0 (path+file:///test)"
+  },
+  "version": 1
+}

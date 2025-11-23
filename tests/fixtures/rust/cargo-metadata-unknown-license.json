@@ -1,0 +1,26 @@
+{
+  "packages": [
+    {
+      "name": "test-rust-project",
+      "version": "0.1.0",
+      "id": "test-rust-project 0.1.0 (path+file:///test)",
+      "license": "MIT",
+      "license_file": null,
+      "source": null,
+      "manifest_path": "/test/Cargo.toml"
+    },
+    {
+      "name": "unknown-crate",
+      "version": "1.0.0",
+      "id": "unknown-crate 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": null,
+      "license_file": "/path/to/LICENSE",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest_path": "/home/user/.cargo/registry/src/unknown-crate-1.0.0/Cargo.toml"
+    }
+  ],
+  "resolve": {
+    "root": "test-rust-project 0.1.0 (path+file:///test)"
+  },
+  "version": 1
+}

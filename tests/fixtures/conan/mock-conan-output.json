@@ -1,0 +1,17 @@
+[
+  {
+    "reference": "boost/1.81.0",
+    "license": "BSL-1.0",
+    "export_folder": "/home/user/.conan/data/boost/1.81.0/_/_/export"
+  },
+  {
+    "reference": "openssl/3.0.7",
+    "license": "Apache-2.0",
+    "export_folder": "/home/user/.conan/data/openssl/3.0.7/_/_/export"
+  },
+  {
+    "reference": "zlib/1.2.13",
+    "license": "Zlib",
+    "export_folder": "/home/user/.conan/data/zlib/1.2.13/_/_/export"
+  }
+]

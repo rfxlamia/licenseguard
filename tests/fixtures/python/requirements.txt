@@ -1,0 +1,12 @@
+# Sample requirements.txt for testing
+requests==2.31.0
+numpy>=1.24.0
+pandas~=2.0.0
+flask[async]>=2.0.0
+
+# Comments should be ignored
+# -e . editable installs should be skipped
+
+# Dependencies with different version specifiers
+pytest==7.4.0
+black>=23.0.0
