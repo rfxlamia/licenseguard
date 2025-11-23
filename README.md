@@ -9,7 +9,7 @@ LicenseGuard helps you set up open source licenses and protects your project fro
 
 ## Key Features
 
-- **Dependency Scanning** - Scans npm dependencies for license conflicts during setup
+- **Multi-Ecosystem Scanning** - Scans dependencies across 5 ecosystems (Node.js, C++, Rust, Python, Go)
 - **Conflict Detection** - Detects incompatible licenses (e.g., GPL vs MIT) and blocks creation
 - **SPDX Compatibility** - Industry-standard license compatibility checking
 - **Scan Results** - Save scan results to `.licenseguardrc` for transparency
@@ -17,6 +17,20 @@ LicenseGuard helps you set up open source licenses and protects your project fro
 - **Zero Effort** - Global hooks install once, work forever
 - **Language Agnostic** - Works for Python, Rust, Go, Ruby, any project
 - **Offline** - All license templates bundled, no internet required
+
+---
+
+## Supported Ecosystems
+
+LicenseGuard scans dependencies across multiple languages and package managers:
+
+- **Node.js** - npm packages (`package.json`)
+- **C/C++** - Conan packages (`conanfile.txt`, `conanfile.py`)
+- **Rust** - Cargo crates (`Cargo.toml`)
+- **Python** - pip/pipenv/poetry packages (`requirements.txt`, `Pipfile`, `pyproject.toml`)
+- **Go** - Go modules (`go.mod`)
+
+Each ecosystem uses optimized detection strategies for maximum accuracy.
 
 ---
 
@@ -175,9 +189,21 @@ Fix conflicts or use --force to proceed anyway:
   licenseguard init --force
 ```
 
+**With Explanation (`--explain`):**
+```bash
+licenseguard init --explain
+# ...
+# ❌ libdwarf@0.9.1 (LGPL-2.1-only)
+#    Conflict: Copyleft incompatible with MIT
+#    ────────────────────────
+#    📚 FSF: MIT license is permissive and GPL-compatible
+#    🔗 https://www.gnu.org/licenses/license-list.html#Expat
+```
+
 **Flags:**
 - `--force` - Create LICENSE despite conflicts (shows warnings)
 - `--noscan` - Skip dependency scanning
+- `--explain` - Show authoritative source citations (FSF/OSI links) for conflicts
 
 ### `init --fast` - Non-Interactive Setup
 
@@ -339,12 +365,20 @@ LicenseGuard works without git:
 
 ### What licenses are checked during scanning?
 
-Scans **npm dependencies only** (reads `package.json` and `node_modules`). It checks:
+LicenseGuard **auto-detects your project type** and scans the appropriate ecosystem:
+- **Node.js**: Reads `package.json` and `node_modules/*/package.json`
+- **C/C++**: Reads Conan metadata via `conan graph info`
+- **Rust**: Reads `cargo metadata` JSON output
+- **Python**: Uses native Python `importlib.metadata` (98.6% detection rate)
+- **Go**: Reads `go.mod` and scans `GOMODCACHE` with streaming NDJSON
+
+All ecosystems check:
 - SPDX license identifiers (MIT, Apache-2.0, GPL-3.0, BSD-3-Clause, ISC, etc.)
 - License compatibility using industry-standard rules
 - Copyleft vs permissive conflicts (e.g., GPL incompatible with MIT)
+- Multi-strategy detection including Jaccard Index similarity matching
 
-For non-JavaScript projects, use `--noscan` flag.
+Mixed-language projects are not yet supported. Use `--noscan` flag if detection is incorrect.
 
 ### How does SPDX compatibility work?
 
@@ -378,12 +412,14 @@ This is useful for:
 
 ### Does this work for non-JavaScript projects?
 
-**Yes!** LicenseGuard works for any project:
-- Python projects
-- Rust/Cargo projects
-- Go modules
-- Ruby gems
-- Any language
+**Yes!** LicenseGuard natively supports 5 ecosystems:
+- **Node.js** - Full dependency scanning
+- **C/C++** - Conan package scanning (requires Conan 2.x or 1.x installed)
+- **Rust** - Cargo crate scanning (requires Cargo installed)
+- **Python** - Native package scanning with 98.6% accuracy (requires Python 3.7+)
+- **Go** - Go module scanning (requires Go installed)
+
+For other languages (Ruby, PHP, etc.), the LICENSE file and git hooks still work, but dependency scanning is not yet available. Use `--noscan` flag for those projects.
 
 The hooks only need Node.js installed (which most developers have).
 

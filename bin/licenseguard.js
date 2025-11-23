@@ -18,6 +18,7 @@ program
   .description('Interactive license setup with dependency scanning')
   .option('--force', 'Create LICENSE despite conflicts')
   .option('--noscan', 'Skip dependency scanning')
+  .option('--explain', 'Show authoritative source citations for license compatibility decisions')
   .option('--fast', 'Non-interactive mode with auto-detection')
   .option('--license <type>', 'License type (for --fast mode)')
   .option('--owner <name>', 'Copyright owner name (for --fast mode)')

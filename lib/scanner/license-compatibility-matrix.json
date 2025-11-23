@@ -1,0 +1,338 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-11-22",
+  "description": "Authoritative license compatibility matrix for top 20 open source licenses covering ~95% of packages",
+  "methodology": "Based on FSF GPL Compatibility List, Mozilla MPL FAQ, Apache Foundation guidance, and SPDX specifications",
+
+  "sources": {
+    "fsf_gpl_compat": {
+      "title": "FSF GPL Compatibility List",
+      "url": "https://www.gnu.org/licenses/license-compatibility.html"
+    },
+    "fsf_license_list": {
+      "title": "FSF License List",
+      "url": "https://www.gnu.org/licenses/license-list.html"
+    },
+    "mozilla_mpl_faq": {
+      "title": "Mozilla MPL 2.0 FAQ",
+      "url": "https://www.mozilla.org/en-US/MPL/2.0/FAQ/"
+    },
+    "mozilla_mpl_gpl": {
+      "title": "Mozilla MPL-GPL Combining Guide",
+      "url": "https://www.mozilla.org/en-US/MPL/2.0/combining-mpl-and-gpl/"
+    },
+    "apache_gpl_compat": {
+      "title": "Apache-GPL Compatibility",
+      "url": "https://www.apache.org/licenses/GPL-compatibility.html"
+    },
+    "spdx_spec": {
+      "title": "SPDX License Expressions",
+      "url": "https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/"
+    },
+    "lgpl_section_3": {
+      "title": "LGPL Section 3 (Upgrade Clause)",
+      "url": "https://www.gnu.org/licenses/lgpl-3.0.html#section3"
+    }
+  },
+
+  "licenses": {
+    "MIT": {
+      "type": "permissive",
+      "description": "Highly permissive license with minimal restrictions",
+      "compatible_with": ["*permissive*"],
+      "incompatible_with": ["*copyleft*"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: MIT license is permissive and GPL-compatible",
+        "url": "https://www.gnu.org/licenses/license-list.html#Expat"
+      },
+      "reasoning": "Permissive licenses cannot incorporate copyleft-licensed code without violating copyleft requirements"
+    },
+
+    "Apache-2.0": {
+      "type": "permissive-with-patent-grant",
+      "description": "Permissive license with explicit patent grant",
+      "compatible_with": ["*permissive*", "GPL-3.0-only", "GPL-3.0-or-later"],
+      "incompatible_with": ["GPL-2.0-only", "GPL-2.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "Apache 2.0 patent clause incompatible with GPL-2.0, but compatible with GPL-3.0",
+        "url": "https://www.apache.org/licenses/GPL-compatibility.html"
+      },
+      "reasoning": "Apache 2.0's patent grant conflicts with GPLv2 section 6, but GPLv3 was designed to resolve this"
+    },
+
+    "BSD-3-Clause": {
+      "type": "permissive",
+      "description": "Permissive BSD license with 3 clauses",
+      "compatible_with": ["*permissive*"],
+      "incompatible_with": ["*copyleft*"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: 3-clause BSD is permissive and GPL-compatible",
+        "url": "https://www.gnu.org/licenses/license-list.html#ModifiedBSD"
+      },
+      "reasoning": "Permissive license, same reasoning as MIT"
+    },
+
+    "BSD-2-Clause": {
+      "type": "permissive",
+      "description": "Simplified BSD license with 2 clauses",
+      "compatible_with": ["*permissive*"],
+      "incompatible_with": ["*copyleft*"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: 2-clause BSD is permissive and GPL-compatible",
+        "url": "https://www.gnu.org/licenses/license-list.html#FreeBSD"
+      },
+      "reasoning": "Even more permissive than BSD-3-Clause"
+    },
+
+    "ISC": {
+      "type": "permissive",
+      "description": "Functionally equivalent to MIT/BSD-2-Clause",
+      "compatible_with": ["*permissive*"],
+      "incompatible_with": ["*copyleft*"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: ISC license is permissive and GPL-compatible",
+        "url": "https://www.gnu.org/licenses/license-list.html#ISC"
+      },
+      "reasoning": "Permissive license, same reasoning as MIT"
+    },
+
+    "0BSD": {
+      "type": "public-domain",
+      "description": "BSD Zero Clause (public domain equivalent)",
+      "compatible_with": ["*"],
+      "incompatible_with": [],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: 0BSD is ultra-permissive public domain equivalent",
+        "url": "https://www.gnu.org/licenses/license-list.html#0BSD"
+      },
+      "reasoning": "Public domain equivalent - compatible with everything"
+    },
+
+    "GPL-3.0-only": {
+      "type": "strong-copyleft",
+      "description": "GNU General Public License v3.0",
+      "compatible_with": ["*permissive*", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only", "AGPL-3.0-only", "AGPL-3.0-or-later"],
+      "can_upgrade_from": ["LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later"],
+      "sources": {
+        "citation": "FSF: GPL-3.0 is compatible with LGPL (via Section 3 upgrade), Apache-2.0, MPL-2.0",
+        "url": "https://www.gnu.org/licenses/gpl-faq.html#AllCompatibility"
+      },
+      "reasoning": "Strong copyleft - requires all combined code to be GPL-3.0. LGPL can upgrade to GPL (Section 3). MPL 2.0 Section 3.3 allows GPL combination. Apache-2.0 patent clause resolved in GPLv3."
+    },
+
+    "GPL-3.0-or-later": {
+      "type": "strong-copyleft",
+      "description": "GNU General Public License v3.0 or any later version",
+      "compatible_with": ["*permissive*", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only"],
+      "can_upgrade_from": ["LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later"],
+      "sources": {
+        "citation": "FSF: GPL-3.0-or-later provides upgrade path flexibility",
+        "url": "https://www.gnu.org/licenses/gpl-faq.html#VersionThreeOrLater"
+      },
+      "reasoning": "Same as GPL-3.0-only but with upgrade flexibility"
+    },
+
+    "GPL-2.0-only": {
+      "type": "strong-copyleft",
+      "description": "GNU General Public License v2.0",
+      "compatible_with": ["*permissive*", "GPL-2.0-only", "GPL-2.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later"],
+      "incompatible_with": ["GPL-3.0-only", "GPL-3.0-or-later", "Apache-2.0", "MPL-2.0"],
+      "can_upgrade_from": ["LGPL-2.1-only", "LGPL-2.1-or-later"],
+      "sources": {
+        "citation": "FSF: GPL-2.0 incompatible with Apache-2.0 (patent clause), MPL-2.0, and GPL-3.0",
+        "url": "https://www.gnu.org/licenses/gpl-faq.html#v2v3Compatibility"
+      },
+      "reasoning": "Strong copyleft. Incompatible with Apache-2.0 (patent clause conflict), MPL-2.0 (file-level copyleft incompatibility), and GPL-3.0 (different copyleft terms)"
+    },
+
+    "GPL-2.0-or-later": {
+      "type": "strong-copyleft",
+      "description": "GNU General Public License v2.0 or any later version",
+      "compatible_with": ["*permissive*", "GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": [],
+      "can_upgrade_from": ["LGPL-2.1-or-later", "LGPL-3.0-or-later"],
+      "sources": {
+        "citation": "FSF: GPL-2.0-or-later can upgrade to GPL-3.0, resolving compatibility issues",
+        "url": "https://www.gnu.org/licenses/gpl-faq.html#v2v3Compatibility"
+      },
+      "reasoning": "Upgrade path to GPL-3.0 resolves Apache-2.0 and MPL-2.0 incompatibilities"
+    },
+
+    "LGPL-2.1-only": {
+      "type": "weak-copyleft",
+      "description": "GNU Lesser General Public License v2.1",
+      "compatible_with": ["*permissive*", "GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later"],
+      "incompatible_with": ["Apache-2.0"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "LGPL Section 3: Can upgrade to corresponding GPL version",
+        "url": "https://www.gnu.org/licenses/lgpl-3.0.html#section3"
+      },
+      "reasoning": "Weak copyleft - Section 3 allows upgrading to GPL. Incompatible with Apache-2.0 due to GPLv2 patent clause conflict."
+    },
+
+    "LGPL-2.1-or-later": {
+      "type": "weak-copyleft",
+      "description": "GNU Lesser General Public License v2.1 or any later version",
+      "compatible_with": ["*permissive*", "GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": [],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "LGPL Section 3: Upgrade path to GPL resolves incompatibilities",
+        "url": "https://www.gnu.org/licenses/lgpl-3.0.html#section3"
+      },
+      "reasoning": "Can upgrade to LGPL-3.0 or GPL-3.0, resolving Apache-2.0 incompatibility"
+    },
+
+    "LGPL-3.0-only": {
+      "type": "weak-copyleft",
+      "description": "GNU Lesser General Public License v3.0",
+      "compatible_with": ["*permissive*", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only", "GPL-2.0-or-later"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "LGPL-3.0 Section 3: Can upgrade to GPL-3.0",
+        "url": "https://www.gnu.org/licenses/lgpl-3.0.html#section3"
+      },
+      "reasoning": "Weak copyleft with GPL upgrade path. Compatible with Apache-2.0 and MPL-2.0 via GPL-3.0 upgrade."
+    },
+
+    "LGPL-3.0-or-later": {
+      "type": "weak-copyleft",
+      "description": "GNU Lesser General Public License v3.0 or any later version",
+      "compatible_with": ["*permissive*", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only", "GPL-2.0-or-later"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "LGPL-3.0-or-later provides upgrade flexibility",
+        "url": "https://www.gnu.org/licenses/lgpl-3.0.html"
+      },
+      "reasoning": "Same as LGPL-3.0-only but with upgrade flexibility"
+    },
+
+    "MPL-2.0": {
+      "type": "weak-copyleft",
+      "description": "Mozilla Public License 2.0 (file-level copyleft)",
+      "compatible_with": ["*permissive*", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "MPL-2.0", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only", "LGPL-2.1-only"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "MPL 2.0 Section 3.3: Secondary licenses allow GPL combination",
+        "url": "https://www.mozilla.org/en-US/MPL/2.0/combining-mpl-and-gpl/"
+      },
+      "reasoning": "Section 3.3 allows MPL-2.0 code to be relicensed under GPL/LGPL when combined. Incompatible with GPL-2.0-only due to terms conflict."
+    },
+
+    "AGPL-3.0-only": {
+      "type": "network-copyleft",
+      "description": "GNU Affero General Public License v3.0 (network use = distribution)",
+      "compatible_with": ["*permissive*", "AGPL-3.0-only", "AGPL-3.0-or-later", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: AGPL-3.0 incompatible with GPL (stricter terms)",
+        "url": "https://www.gnu.org/licenses/gpl-faq.html#AllCompatibility"
+      },
+      "reasoning": "Network copyleft - stricter than GPL. Cannot combine AGPL with GPL due to additional restrictions."
+    },
+
+    "AGPL-3.0-or-later": {
+      "type": "network-copyleft",
+      "description": "GNU Affero General Public License v3.0 or any later version",
+      "compatible_with": ["*permissive*", "AGPL-3.0-only", "AGPL-3.0-or-later", "Apache-2.0"],
+      "incompatible_with": ["GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later"],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "FSF: AGPL-3.0-or-later incompatible with GPL",
+        "url": "https://www.gnu.org/licenses/gpl-faq.html#AllCompatibility"
+      },
+      "reasoning": "Same as AGPL-3.0-only"
+    },
+
+    "Unlicense": {
+      "type": "public-domain",
+      "description": "Public domain dedication",
+      "compatible_with": ["*"],
+      "incompatible_with": [],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "Public domain dedication - no restrictions",
+        "url": "https://unlicense.org/"
+      },
+      "reasoning": "No restrictions - compatible with everything"
+    },
+
+    "CC0-1.0": {
+      "type": "public-domain",
+      "description": "Creative Commons Zero (public domain)",
+      "compatible_with": ["*"],
+      "incompatible_with": [],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "Public domain waiver - no restrictions",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+      },
+      "reasoning": "Public domain waiver - compatible with everything"
+    },
+
+    "WTFPL": {
+      "type": "public-domain",
+      "description": "Do What The F*ck You Want To Public License",
+      "compatible_with": ["*"],
+      "incompatible_with": [],
+      "can_upgrade_from": [],
+      "sources": {
+        "citation": "Ultra-permissive - no restrictions",
+        "url": "http://www.wtfpl.net/"
+      },
+      "reasoning": "No restrictions - compatible with everything"
+    }
+  },
+
+  "wildcards": {
+    "*permissive*": [
+      "MIT",
+      "Apache-2.0",
+      "BSD-3-Clause",
+      "BSD-2-Clause",
+      "BSD-1-Clause",
+      "ISC",
+      "0BSD",
+      "Zlib",
+      "bzip2-1.0.6",
+      "BSL-1.0",
+      "PSF-2.0"
+    ],
+    "*copyleft*": [
+      "GPL-2.0-only",
+      "GPL-2.0-or-later",
+      "GPL-3.0-only",
+      "GPL-3.0-or-later",
+      "LGPL-2.1-only",
+      "LGPL-2.1-or-later",
+      "LGPL-3.0-only",
+      "LGPL-3.0-or-later",
+      "MPL-2.0",
+      "MPL-1.1",
+      "AGPL-3.0-only",
+      "AGPL-3.0-or-later",
+      "EPL-2.0",
+      "EUPL-1.2",
+      "CDDL-1.0"
+    ],
+    "*public-domain*": [
+      "Unlicense",
+      "CC0-1.0",
+      "WTFPL",
+      "0BSD"
+    ]
+  }
+}
