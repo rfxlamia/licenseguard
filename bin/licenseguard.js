@@ -6,7 +6,14 @@ const { version } = require('../package.json')
 const { runList } = require('../lib/commands/list')
 const { runInit } = require('../lib/commands/init')
 const { runInitFast } = require('../lib/commands/init-fast')
+const { runScan } = require('../lib/commands/scan')
 const { setupCommand } = require('../lib/commands/setup')
+const { checkForUpdates } = require('../lib/utils/update-notifier')
+
+// Check for updates (non-blocking, silent failure)
+checkForUpdates(version).catch(() => {
+  // Silent failure - don't block user
+})
 
 program
   .version(version)
@@ -31,6 +38,24 @@ program
       } else {
         await runInit(options)
       }
+    } catch (error) {
+      console.error(chalk.red('✗ Error:'), error.message)
+      process.exit(1)
+    }
+  })
+
+// Scan command
+program
+  .command('scan')
+  .description('Scan dependencies for license conflicts')
+  .option('--license <type>', 'Specify project license (if not auto-detected)')
+  .option('--allow', 'Allow conflicts (exit 0 even if conflicts found)')
+  .option('--fail-on-unknown', 'Fail if unknown licenses detected')
+  .option('--explain', 'Show authoritative source citations for license compatibility decisions')
+  .option('--cwd <path>', 'Working directory to scan')
+  .action(async (options) => {
+    try {
+      await runScan(options)
     } catch (error) {
       console.error(chalk.red('✗ Error:'), error.message)
       process.exit(1)

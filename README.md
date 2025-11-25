@@ -269,6 +269,72 @@ Reads existing `.licenseguardrc` and installs hooks. Used in npm prepare scripts
 
 ---
 
+## Color-coded Output
+
+LicenseGuard uses visual safety hierarchy with color-coding to help you quickly identify dangerous licenses:
+
+### Safety Level Legend
+
+| Color | Emoji | License Type | Examples |
+|-------|-------|--------------|----------|
+| 🟢 **Green** | Safe | Permissive licenses | MIT, Apache-2.0, BSD-*, ISC, 0BSD, Unlicense |
+| ⚠️ **Yellow** | Caution | Weak copyleft | MPL-2.0, LGPL-*, EPL-* |
+| ❌ **Red** | Dangerous | Strong copyleft | GPL-*, AGPL-* |
+| ❔ **Gray** | Unknown | Requires manual review | UNKNOWN, unrecognized licenses |
+
+### How It Works
+
+Licenses are automatically color-coded in all commands (`init`, `scan`) based on their safety level:
+
+- **Green licenses** (🟢) are permissive and safe to use - they allow you to do almost anything
+- **Yellow licenses** (⚠️) require caution - they have some copyleft restrictions
+- **Red licenses** (❌) are strong copyleft - they may require your project to use the same license
+- **Gray licenses** (❔) are unknown or unrecognized - manual review required
+
+**Example Output:**
+```bash
+licenseguard scan
+
+❌ 2 issue(s) found:
+
+❌ some-gpl-lib@2.0.0 (❌ GPL-3.0)
+   Conflict: Copyleft incompatible with MIT
+   Location: node_modules/some-gpl-lib/package.json
+
+⚠️  unknown-lib@1.0.0 (❔ UNKNOWN)
+   No license field found
+   Location: node_modules/unknown-lib/package.json
+```
+
+### Accessibility
+
+Colors work in both light and dark terminal themes, and emojis are used as secondary indicators for colorblind users:
+- Green = 🟢 (green circle)
+- Yellow = ⚠️ (warning triangle)
+- Red = ❌ (red X)
+- Gray = ❔ (question mark)
+
+---
+
+## Update Notifications
+
+LicenseGuard automatically checks for updates once per day (cached for 24 hours). When a new version is available, you'll see:
+
+```bash
+╔═══════════════════════════════════════════════╗
+║  Update available: 2.1.0 → 2.1.1              ║
+║  Run: npm install -g licenseguard-cli@latest  ║
+╚═══════════════════════════════════════════════╝
+```
+
+**Update check behavior:**
+- Checks npm registry once per 24 hours
+- Non-blocking (doesn't slow down CLI startup)
+- Fails silently if network unavailable
+- Result cached in OS temp directory
+
+---
+
 ## Supported Licenses
 
 | Key | Name | Description |

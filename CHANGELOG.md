@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2025-11-25
+
+### Added
+- **Color-coded License Output** - Visual safety hierarchy for quick risk assessment
+  - Green (🟢): Permissive licenses (MIT, Apache-2.0, BSD-*, ISC)
+  - Yellow (⚠️): Weak copyleft (MPL-2.0, LGPL-*)
+  - Red (❌): Strong copyleft (GPL-*, AGPL-*)
+  - Gray (❔): Unknown licenses (requires manual review)
+  - Emojis as secondary indicators for accessibility (colorblind-friendly)
+  - Works in both light and dark terminal themes
+- **Update Notifier** - Automatic update notifications
+  - Checks npm registry once per 24 hours
+  - Displays banner when newer version available
+  - Non-blocking (doesn't slow down CLI startup)
+  - Fails silently if network unavailable
+  - Cache stored in OS temp directory
+
+### Changed
+- All license output now color-coded in `init` command
+- Conflict reports now show visual safety indicators
+
 ## [2.1.0] - 2025-11-23
 
 ### Added
