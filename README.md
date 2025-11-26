@@ -5,7 +5,7 @@
 
 > License setup & compliance guard for developers
 
-LicenseGuard helps you set up open source licenses and protects your project from license conflicts. It scans your dependencies for incompatible licenses and automatically notifies developers about licensing requirements - works with any language (Node.js, Python, Rust, Go, etc.).
+LicenseGuard helps you set up open source licenses and protects your project from license conflicts. It scans your dependencies for incompatible licenses and automatically notifies developers about licensing requirements - works across ecosystems (Node.js, Python, Rust, Go, C++).
 
 ## Key Features
 
@@ -15,7 +15,6 @@ LicenseGuard helps you set up open source licenses and protects your project fro
 - **Scan Results** - Save scan results to `.licenseguardrc` for transparency
 - **Automatic Notifications** - See license info immediately after `git clone`
 - **Zero Effort** - Global hooks install once, work forever
-- **Language Agnostic** - Works for Python, Rust, Go, Ruby, any project
 - **Offline** - All license templates bundled, no internet required
 
 ---
@@ -189,7 +188,7 @@ Fix conflicts or use --force to proceed anyway:
   licenseguard init --force
 ```
 
-**With Explanation (`--explain`):**
+### `init --explain` - With Explanation
 ```bash
 licenseguard init --explain
 # ...
@@ -269,73 +268,8 @@ Reads existing `.licenseguardrc` and installs hooks. Used in npm prepare scripts
 
 ---
 
-## Color-coded Output
+## Supported License Setup
 
-LicenseGuard uses visual safety hierarchy with color-coding to help you quickly identify dangerous licenses:
-
-### Safety Level Legend
-
-| Color | Emoji | License Type | Examples |
-|-------|-------|--------------|----------|
-| 🟢 **Green** | Safe | Permissive licenses | MIT, Apache-2.0, BSD-*, ISC, 0BSD, Unlicense |
-| ⚠️ **Yellow** | Caution | Weak copyleft | MPL-2.0, LGPL-*, EPL-* |
-| ❌ **Red** | Dangerous | Strong copyleft | GPL-*, AGPL-* |
-| ❔ **Gray** | Unknown | Requires manual review | UNKNOWN, unrecognized licenses |
-
-### How It Works
-
-Licenses are automatically color-coded in all commands (`init`, `scan`) based on their safety level:
-
-- **Green licenses** (🟢) are permissive and safe to use - they allow you to do almost anything
-- **Yellow licenses** (⚠️) require caution - they have some copyleft restrictions
-- **Red licenses** (❌) are strong copyleft - they may require your project to use the same license
-- **Gray licenses** (❔) are unknown or unrecognized - manual review required
-
-**Example Output:**
-```bash
-licenseguard scan
-
-❌ 2 issue(s) found:
-
-❌ some-gpl-lib@2.0.0 (❌ GPL-3.0)
-   Conflict: Copyleft incompatible with MIT
-   Location: node_modules/some-gpl-lib/package.json
-
-⚠️  unknown-lib@1.0.0 (❔ UNKNOWN)
-   No license field found
-   Location: node_modules/unknown-lib/package.json
-```
-
-### Accessibility
-
-Colors work in both light and dark terminal themes, and emojis are used as secondary indicators for colorblind users:
-- Green = 🟢 (green circle)
-- Yellow = ⚠️ (warning triangle)
-- Red = ❌ (red X)
-- Gray = ❔ (question mark)
-
----
-
-## Update Notifications
-
-LicenseGuard automatically checks for updates once per day (cached for 24 hours). When a new version is available, you'll see:
-
-```bash
-╔═══════════════════════════════════════════════╗
-║  Update available: 2.1.0 → 2.1.1              ║
-║  Run: npm install -g licenseguard-cli@latest  ║
-╚═══════════════════════════════════════════════╝
-```
-
-**Update check behavior:**
-- Checks npm registry once per 24 hours
-- Non-blocking (doesn't slow down CLI startup)
-- Fails silently if network unavailable
-- Result cached in OS temp directory
-
----
-
-## Supported Licenses
 
 | Key | Name | Description |
 |-----|------|-------------|
@@ -535,12 +469,46 @@ Yes! Fully cross-platform (Linux, macOS, Windows).
 ## Contributing
 
 Contributions welcome!
+**We need your help to make LicenseGuard better.**
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push: `git push origin feature/amazing`
-5. Open Pull Request
+---
+
+### How to Contribute
+
+1. Read [CONTRIBUTING.md](CONTRIBUTING.md) - Philosophy and guidelines
+2. Check [GitHub Issues](https://github.com/rfxlamia/licenseguard-development/issues) for "good first issue" label
+3. Fork repository
+4. Create branch: `git checkout -b feat/license-mpl2`
+5. Write tests (90%+ coverage required)
+6. Submit Pull Request
+
+**Philosophy:**
+- **Zero Bloat** - Prefer native APIs over dependencies
+- **Ecosystem Native** - Research the right tool, don't guess
+- **Fail-Safe** - Plugins fail gracefully, never crash
+- **Feel Code** - Understand what you parse
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
+
+---
+
+## Code of Conduct
+
+We're committed to an inclusive community. Read our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+**Key principles:**
+- **No Elitism** - Grit and learning > credentials
+- **No Gatekeeping** - Teach, don't preach
+- **Practicality > Purity** - Readable > clever
+- **Respect the Craft** - Code is communication
+
+---
+
+## Documentation
+
+- **[QUICK-USE.md](QUICK-USE.md)** - Complete command reference and examples
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Community standards
 
 ---
 
@@ -553,5 +521,9 @@ MIT License - see [LICENSE](LICENSE) file.
 ## Links
 
 - [npm Package](https://www.npmjs.com/package/licenseguard-cli)
+- [GitHub Repository](https://github.com/rfxlamia/licenseguard)
+- [Quick Use Guide](QUICK-USE.md)
+- [Contributing Guide](CONTRIBUTING.md)
 - [Choose a License](https://choosealicense.com)
-- [Open Source Initiative](https://opensource.org/licenses)
+- [SPDX License List](https://spdx.org/licenses/)
+

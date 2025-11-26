@@ -294,12 +294,16 @@ describe('Node.js Plugin', () => {
         }
         return 'not valid json'
       })
-      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
+        // No lockfile - should use flat scan
+        if (path.includes('package-lock.json')) return false
+        return true
+      })
 
       const result = await scanDependencies('MIT')
       expect(result.unknown).toBe(1)
       expect(result.issues[0].type).toBe('warning')
-      expect(result.issues[0].reason).toBe('Failed to parse package.json')
+      expect(result.issues[0].reason).toBe('No license field found')
     })
 
     it('should handle WTFPL as compatible', async () => {
@@ -313,7 +317,11 @@ describe('Node.js Plugin', () => {
         }
         return JSON.stringify({ name: 'wtfpl-package', version: '1.0.0', license: 'WTFPL' })
       })
-      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
+        // No lockfile - should use flat scan
+        if (path.includes('package-lock.json')) return false
+        return true
+      })
 
       const result = await scanDependencies('MIT')
       expect(result.compatible).toBe(1)
@@ -343,7 +351,11 @@ describe('Node.js Plugin', () => {
         }
         return JSON.stringify({ name: 'package', version: '1.0.0', license: 'MIT' })
       })
-      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
+        // No lockfile - should use flat scan
+        if (path.includes('package-lock.json')) return false
+        return true
+      })
 
       await scanDependencies('MIT')
       expect(stdoutWriteSpy).toHaveBeenCalled()

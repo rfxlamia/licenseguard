@@ -10,9 +10,15 @@ coverage/
 jest.config.js
 .licenseguardrc
 
-# Other
+# Other markdown files (keep necessary)
 *.md
 !README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!QUICK-USE.md
+
+# Dependencies and artifacts
 node_modules/
 *.tgz
 .git/

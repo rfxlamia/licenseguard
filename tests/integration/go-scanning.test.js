@@ -350,7 +350,7 @@ version = "0.1.0"
   })
 
   describe('Conflict report display', () => {
-    it('should display conflicts correctly via displayConflictReport', () => {
+    it('should display conflicts correctly via displayConflictReport', async () => {
       const { displayConflictReport } = require('../../lib/scanner')
 
       const scanResult = {
@@ -374,7 +374,7 @@ version = "0.1.0"
       console.log = (...args) => logs.push(args.join(' '))
 
       try {
-        const hasConflicts = displayConflictReport(scanResult, 'MIT')
+        const hasConflicts = await displayConflictReport(scanResult, 'MIT')
 
         expect(hasConflicts).toBe(true)
         expect(logs.some(log => log.includes('gpl'))).toBe(true)
@@ -383,7 +383,7 @@ version = "0.1.0"
       }
     })
 
-    it('should display warnings for unknown Go module licenses', () => {
+    it('should display warnings for unknown Go module licenses', async () => {
       const { displayConflictReport } = require('../../lib/scanner')
 
       const scanResult = {
@@ -406,7 +406,7 @@ version = "0.1.0"
       console.log = (...args) => logs.push(args.join(' '))
 
       try {
-        const hasConflicts = displayConflictReport(scanResult, 'MIT')
+        const hasConflicts = await displayConflictReport(scanResult, 'MIT')
 
         // Warnings should not return true for conflicts
         expect(hasConflicts).toBe(false)
@@ -416,7 +416,7 @@ version = "0.1.0"
       }
     })
 
-    it('should display success message when all compatible', () => {
+    it('should display success message when all compatible', async () => {
       const { displayConflictReport } = require('../../lib/scanner')
 
       const scanResult = {
@@ -433,7 +433,7 @@ version = "0.1.0"
       console.log = (...args) => logs.push(args.join(' '))
 
       try {
-        const hasConflicts = displayConflictReport(scanResult, 'MIT')
+        const hasConflicts = await displayConflictReport(scanResult, 'MIT')
 
         expect(hasConflicts).toBe(false)
         expect(logs.some(log => log.includes('compatible'))).toBe(true)

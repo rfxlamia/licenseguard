@@ -12,7 +12,8 @@ const {
   parseRequirementsTxt,
   parsePipfile,
   parsePyprojectToml,
-  getLicensesBatch
+  getLicensesBatch,
+  resetPythonCommandCache
 } = require('../../lib/scanner/plugins/python')
 // normalizePythonLicense moved to shared normalizer - now use normalize()
 const { normalize: normalizePythonLicense } = require('../../lib/scanner/license-normalizer')
@@ -36,6 +37,10 @@ jest.mock('../../lib/scanner/progress', () => ({
 const { showProgress } = require('../../lib/scanner/progress')
 
 describe('Python Plugin', () => {
+  beforeEach(() => {
+    resetPythonCommandCache() // Reset cache between tests
+  })
+
   describe('detect', () => {
     let existsSyncSpy
 
@@ -296,14 +301,22 @@ describe('Python Plugin', () => {
   })
 
   describe('getLicensesBatch', () => {
+    let existsSyncSpy
+
     beforeEach(() => {
       execSync.mockReset()
       showProgress.mockReset()
+      // Mock fs.existsSync to return false for venv directories by default
+      // Individual tests can override this if they need to test venv detection
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false)
     })
 
     afterEach(() => {
       execSync.mockReset()
       showProgress.mockReset()
+      if (existsSyncSpy) {
+        existsSyncSpy.mockRestore()
+      }
     })
 
     it('should return empty object for empty package list', () => {
@@ -314,6 +327,9 @@ describe('Python Plugin', () => {
     })
 
     it('should call Python script and parse JSON output', () => {
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',
         numpy: 'BSD-3-Clause'
@@ -329,6 +345,9 @@ describe('Python Plugin', () => {
     })
 
     it('should normalize licenses from Python script output', () => {
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       execSync.mockReturnValueOnce(JSON.stringify({
         flask: 'BSD License',
         requests: 'Apache 2.0'
@@ -343,6 +362,9 @@ describe('Python Plugin', () => {
     })
 
     it('should handle UNKNOWN licenses', () => {
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       execSync.mockReturnValueOnce(JSON.stringify({
         somepackage: 'UNKNOWN'
       }))
@@ -355,8 +377,9 @@ describe('Python Plugin', () => {
     })
 
     it('should throw error when Python not installed', () => {
+      // Mock execSync to throw error for all python commands (version check fails)
       execSync.mockImplementation(() => {
-        const error = new Error('Command failed: python')
+        const error = new Error('Command failed: python3 --version')
         error.message = 'command not found'
         throw error
       })
@@ -365,7 +388,11 @@ describe('Python Plugin', () => {
     })
 
     it('should mark packages as UNKNOWN on non-fatal errors', () => {
-      execSync.mockImplementation(() => {
+      // Mock successful python detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
+      // Mock non-fatal error on script execution
+      execSync.mockImplementationOnce(() => {
         const error = new Error('Some error')
         error.stderr = 'Warning: package not found'
         throw error
@@ -379,7 +406,11 @@ describe('Python Plugin', () => {
     })
 
     it('should throw error on fatal system errors', () => {
-      execSync.mockImplementation(() => {
+      // Mock successful python detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
+      // Mock fatal error on script execution
+      execSync.mockImplementationOnce(() => {
         const error = new Error('Fatal error')
         error.stderr = 'No space left on device'
         throw error
@@ -392,6 +423,10 @@ describe('Python Plugin', () => {
       // Create 150 packages to test chunking (chunk size is 100)
       const packages = Array.from({ length: 150 }, (_, i) => `package${i}`)
 
+      // Mock Python detection (called once due to caching)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
+      // Mock script executions (called twice for 2 chunks: 100 + 50 packages)
       execSync.mockImplementation(() => {
         const licenses = {}
         for (let i = 0; i < 100; i++) {
@@ -402,13 +437,16 @@ describe('Python Plugin', () => {
 
       getLicensesBatch(packages, 'pip')
 
-      // Should have called execSync twice (2 chunks: 100 + 50)
-      expect(execSync).toHaveBeenCalledTimes(2)
+      // Should have called execSync 3 times (1 detection + 2 chunks)
+      expect(execSync).toHaveBeenCalledTimes(3)
       expect(showProgress).toHaveBeenCalledWith(1, 2)
       expect(showProgress).toHaveBeenCalledWith(2, 2)
     })
 
     it('should handle case-insensitive package names', () => {
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       execSync.mockReturnValueOnce(JSON.stringify({
         django: 'BSD-3-Clause'
       }))
@@ -448,6 +486,9 @@ describe('Python Plugin', () => {
       existsSyncSpy.mockImplementation((file) => file === 'requirements.txt')
       readFileSyncSpy.mockReturnValue('requests==2.31.0\nnumpy>=1.24.0')
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       // Mock Python script output (JSON)
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',
@@ -466,6 +507,9 @@ describe('Python Plugin', () => {
     it('should detect GPL conflict with MIT project', async () => {
       existsSyncSpy.mockImplementation((file) => file === 'requirements.txt')
       readFileSyncSpy.mockReturnValue('requests==2.31.0\ngplpackage>=1.0.0')
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       // Mock Python script output
       execSync.mockReturnValueOnce(JSON.stringify({
@@ -487,6 +531,9 @@ describe('Python Plugin', () => {
       existsSyncSpy.mockImplementation((file) => file === 'requirements.txt')
       readFileSyncSpy.mockReturnValue('requests==2.31.0\nunknownpkg>=1.0.0')
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       // Mock Python script output
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',
@@ -506,6 +553,9 @@ describe('Python Plugin', () => {
       existsSyncSpy.mockImplementation((file) => file === 'Pipfile')
       readFileSyncSpy.mockReturnValue('[packages]\nrequests = "==2.31.0"\nnumpy = ">=1.24.0"')
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',
         numpy: 'BSD-3-Clause'
@@ -523,6 +573,9 @@ describe('Python Plugin', () => {
         '[tool.poetry.dependencies]\npython = "^3.9"\nrequests = "^2.31.0"'
       )
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0'
       }))
@@ -536,6 +589,9 @@ describe('Python Plugin', () => {
     it('should handle multiple dependencies with mixed licenses', async () => {
       existsSyncSpy.mockImplementation((file) => file === 'requirements.txt')
       readFileSyncSpy.mockReturnValue('requests==2.31.0\nnumpy>=1.24.0\nflask>=2.0.0')
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',

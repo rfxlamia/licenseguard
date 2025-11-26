@@ -1,0 +1,8 @@
+{
+  "name": "test-project-corrupt",
+  "version": "1.0.0",
+  "lockfileVersion": 2
+  "packages": {
+    "": {
+      "name": "test-project-corrupt"
+      "version": "1.0.0",

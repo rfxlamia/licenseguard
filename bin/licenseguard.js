@@ -52,6 +52,7 @@ program
   .option('--allow', 'Allow conflicts (exit 0 even if conflicts found)')
   .option('--fail-on-unknown', 'Fail if unknown licenses detected')
   .option('--explain', 'Show authoritative source citations for license compatibility decisions')
+  .option('--format <type>', 'Output format (html) - generates CREDITS.html for mobile apps')
   .option('--cwd <path>', 'Working directory to scan')
   .action(async (options) => {
     try {

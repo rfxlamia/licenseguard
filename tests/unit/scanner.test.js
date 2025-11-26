@@ -18,8 +18,17 @@ jest.mock('chalk', () => ({
   green: jest.fn((str) => str),
   red: jest.fn((str) => str),
   yellow: jest.fn((str) => str),
-  gray: jest.fn((str) => str)
+  gray: jest.fn((str) => str),
+  blue: jest.fn((str) => str)
 }))
+
+// Mock path-tracer module
+jest.mock('../../lib/scanner/path-tracer', () => ({
+  traceDependencyPath: jest.fn(() => null)
+}))
+
+// Mock fs for ecosystem detection
+jest.mock('fs')
 
 describe('parsePackageJson', () => {
   let readFileSyncSpy
@@ -150,6 +159,7 @@ describe('scanDependencies', () => {
       name: 'test',
       dependencies: {}
     }))
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
 
     const result = await scanDependencies('MIT')
     expect(result.totalDependencies).toBe(0)
@@ -275,12 +285,16 @@ describe('scanDependencies', () => {
       }
       return 'not valid json'
     })
-    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
+      // No lockfile - should use flat scan
+      if (path.includes('package-lock.json')) return false
+      return true
+    })
 
     const result = await scanDependencies('MIT')
     expect(result.unknown).toBe(1)
     expect(result.issues[0].type).toBe('warning')
-    expect(result.issues[0].reason).toBe('Failed to parse package.json')
+    expect(result.issues[0].reason).toBe('No license field found')
   })
 
   it('should handle WTFPL as compatible', async () => {
@@ -294,7 +308,11 @@ describe('scanDependencies', () => {
       }
       return JSON.stringify({ name: 'wtfpl-package', version: '1.0.0', license: 'WTFPL' })
     })
-    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
+      // No lockfile - should use flat scan
+      if (path.includes('package-lock.json')) return false
+      return true
+    })
 
     const result = await scanDependencies('MIT')
     expect(result.compatible).toBe(1)
@@ -306,6 +324,7 @@ describe('scanDependencies', () => {
     readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
       dependencies: {}
     }))
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
 
     const result = await scanDependencies('MIT')
     expect(result.timestamp).toBeDefined()
@@ -324,7 +343,11 @@ describe('scanDependencies', () => {
       }
       return JSON.stringify({ name: 'package', version: '1.0.0', license: 'MIT' })
     })
-    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
+      // No lockfile - should use flat scan
+      if (path.includes('package-lock.json')) return false
+      return true
+    })
 
     await scanDependencies('MIT')
     expect(stdoutWriteSpy).toHaveBeenCalled()
@@ -334,16 +357,24 @@ describe('scanDependencies', () => {
 
 describe('displayConflictReport', () => {
   let consoleLogSpy
+  let existsSyncSpy
+  const { traceDependencyPath } = require('../../lib/scanner/path-tracer')
 
   beforeEach(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation()
+    traceDependencyPath.mockClear()
+    traceDependencyPath.mockReturnValue(null)
+
+    // Mock as Node.js project by default (package.json exists)
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true)
   })
 
   afterEach(() => {
     consoleLogSpy.mockRestore()
+    if (existsSyncSpy) existsSyncSpy.mockRestore()
   })
 
-  it('should display success message for clean scan', () => {
+  it('should display success message for clean scan', async () => {
     const scanResult = {
       totalDependencies: 10,
       compatible: 10,
@@ -352,7 +383,7 @@ describe('displayConflictReport', () => {
       issues: []
     }
 
-    const hasConflicts = displayConflictReport(scanResult, 'MIT')
+    const hasConflicts = await displayConflictReport(scanResult, 'MIT')
     expect(hasConflicts).toBe(false)
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining('✅')
@@ -362,7 +393,7 @@ describe('displayConflictReport', () => {
     )
   })
 
-  it('should display conflicts with red color', () => {
+  it('should display conflicts with red color', async () => {
     const scanResult = {
       totalDependencies: 2,
       compatible: 1,
@@ -379,14 +410,14 @@ describe('displayConflictReport', () => {
       ]
     }
 
-    const hasConflicts = displayConflictReport(scanResult, 'MIT')
+    const hasConflicts = await displayConflictReport(scanResult, 'MIT')
     expect(hasConflicts).toBe(true)
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining('❌')
     )
   })
 
-  it('should display warnings with yellow color', () => {
+  it('should display warnings with yellow color', async () => {
     const scanResult = {
       totalDependencies: 1,
       compatible: 0,
@@ -403,14 +434,14 @@ describe('displayConflictReport', () => {
       ]
     }
 
-    const hasConflicts = displayConflictReport(scanResult, 'MIT')
+    const hasConflicts = await displayConflictReport(scanResult, 'MIT')
     expect(hasConflicts).toBe(false) // Warnings should not block (no conflicts)
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining('⚠️')
     )
   })
 
-  it('should display both conflicts and warnings', () => {
+  it('should display both conflicts and warnings', async () => {
     const scanResult = {
       totalDependencies: 2,
       compatible: 0,
@@ -434,11 +465,165 @@ describe('displayConflictReport', () => {
       ]
     }
 
-    const hasConflicts = displayConflictReport(scanResult, 'MIT')
+    const hasConflicts = await displayConflictReport(scanResult, 'MIT')
     expect(hasConflicts).toBe(true)
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining('2 issue(s) found')
     )
+  })
+
+  it('should display dependency path for conflicts when available', async () => {
+    traceDependencyPath.mockReturnValue('app → folly → liburing')
+
+    const scanResult = {
+      totalDependencies: 1,
+      compatible: 0,
+      incompatible: 1,
+      unknown: 0,
+      issues: [
+        {
+          package: 'liburing@2.0.0',
+          license: 'GPL-2.0',
+          type: 'conflict',
+          reason: 'Copyleft incompatible with MIT',
+          location: path.join('node_modules', 'liburing', 'package.json')
+        }
+      ]
+    }
+
+    const hasConflicts = await displayConflictReport(scanResult, 'MIT')
+    expect(hasConflicts).toBe(true)
+    expect(traceDependencyPath).toHaveBeenCalledWith('liburing@2.0.0', process.cwd())
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Path: app → folly → liburing')
+    )
+  })
+
+  it('should not display path when traceDependencyPath returns null', async () => {
+    traceDependencyPath.mockReturnValue(null)
+
+    const scanResult = {
+      totalDependencies: 1,
+      compatible: 0,
+      incompatible: 1,
+      unknown: 0,
+      issues: [
+        {
+          package: 'gpl-package@2.0.0',
+          license: 'GPL-3.0',
+          type: 'conflict',
+          reason: 'Copyleft incompatible with MIT',
+          location: path.join('node_modules', 'gpl-package', 'package.json')
+        }
+      ]
+    }
+
+    const hasConflicts = await displayConflictReport(scanResult, 'MIT')
+    expect(hasConflicts).toBe(true)
+    expect(traceDependencyPath).toHaveBeenCalledWith('gpl-package@2.0.0', process.cwd())
+
+    // Path line should NOT appear
+    const allCalls = consoleLogSpy.mock.calls.map(call => call[0]).join('\n')
+    expect(allCalls).not.toContain('Path:')
+  })
+
+  it('should not trace path for warnings (only conflicts)', async () => {
+    const scanResult = {
+      totalDependencies: 1,
+      compatible: 0,
+      incompatible: 0,
+      unknown: 1,
+      issues: [
+        {
+          package: 'unknown-package@1.0.0',
+          license: 'UNKNOWN',
+          type: 'warning',
+          reason: 'No license field found',
+          location: path.join('node_modules', 'unknown-package', 'package.json')
+        }
+      ]
+    }
+
+    await displayConflictReport(scanResult, 'MIT')
+
+    // traceDependencyPath should NOT be called for warnings
+    expect(traceDependencyPath).not.toHaveBeenCalled()
+  })
+
+  it('should trace path for multiple conflicts', async () => {
+    traceDependencyPath.mockImplementation((pkg) => {
+      if (pkg === 'liburing@2.0.0') return 'app → folly → liburing'
+      if (pkg === 'gpl-lib@1.0.0') return 'app → gpl-lib'
+      return null
+    })
+
+    const scanResult = {
+      totalDependencies: 2,
+      compatible: 0,
+      incompatible: 2,
+      unknown: 0,
+      issues: [
+        {
+          package: 'liburing@2.0.0',
+          license: 'GPL-2.0',
+          type: 'conflict',
+          reason: 'Copyleft incompatible',
+          location: path.join('node_modules', 'liburing', 'package.json')
+        },
+        {
+          package: 'gpl-lib@1.0.0',
+          license: 'GPL-3.0',
+          type: 'conflict',
+          reason: 'Copyleft incompatible',
+          location: path.join('node_modules', 'gpl-lib', 'package.json')
+        }
+      ]
+    }
+
+    await displayConflictReport(scanResult, 'MIT')
+
+    expect(traceDependencyPath).toHaveBeenCalledTimes(2)
+    expect(traceDependencyPath).toHaveBeenCalledWith('liburing@2.0.0', process.cwd())
+    expect(traceDependencyPath).toHaveBeenCalledWith('gpl-lib@1.0.0', process.cwd())
+
+    const allCalls = consoleLogSpy.mock.calls.map(call => call[0]).join('\n')
+    expect(allCalls).toContain('Path: app → folly → liburing')
+    expect(allCalls).toContain('Path: app → gpl-lib')
+  })
+
+  it('should NOT trace path for non-Node.js projects (C++, Rust, etc.)', async () => {
+    // Mock as C++ project (no package.json, has conanfile.txt)
+    existsSyncSpy.mockImplementation((filePath) => {
+      if (filePath === 'package.json') return false
+      if (filePath === 'conanfile.txt') return true
+      return false
+    })
+
+    const scanResult = {
+      totalDependencies: 1,
+      compatible: 0,
+      incompatible: 1,
+      unknown: 0,
+      issues: [
+        {
+          package: 'liburing@2.6',
+          license: 'GPL-2.0',
+          type: 'conflict',
+          reason: 'Copyleft incompatible',
+          location: 'conan-cache'
+        }
+      ]
+    }
+
+    await displayConflictReport(scanResult, 'MIT')
+
+    // traceDependencyPath should NOT be called for non-Node.js projects
+    expect(traceDependencyPath).not.toHaveBeenCalled()
+
+    // Path line and warning should NOT appear
+    const allCalls = consoleLogSpy.mock.calls.map(call => call[0]).join('\n')
+    expect(allCalls).not.toContain('Path:')
+    expect(allCalls).not.toContain('Could not trace path')
   })
 })
 

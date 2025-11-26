@@ -25,7 +25,7 @@ jest.mock('../../lib/scanner/progress', () => ({
 }))
 
 // Import scanner components
-const { detect, scanDependencies } = require('../../lib/scanner/plugins/python')
+const { detect, scanDependencies, resetPythonCommandCache } = require('../../lib/scanner/plugins/python')
 
 describe('Python Scanning Integration', () => {
   let testDir
@@ -36,6 +36,7 @@ describe('Python Scanning Integration', () => {
     testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'licenseguard-python-test-'))
     originalCwd = process.cwd()
     execSync.mockReset()
+    resetPythonCommandCache() // Reset cache between tests
   })
 
   afterEach(() => {
@@ -121,6 +122,9 @@ describe('Python Scanning Integration', () => {
 
       process.chdir(testDir)
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       // Mock Python script output (JSON)
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',
@@ -138,6 +142,9 @@ describe('Python Scanning Integration', () => {
       fs.writeFileSync(pipfilePath, '[packages]\nrequests = "==2.31.0"\nnumpy = ">=1.24.0"')
 
       process.chdir(testDir)
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       // Mock Python script output
       execSync.mockReturnValueOnce(JSON.stringify({
@@ -159,6 +166,9 @@ describe('Python Scanning Integration', () => {
 
       process.chdir(testDir)
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       // Mock Python script output (only requests, python is skipped)
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0'
@@ -175,6 +185,9 @@ describe('Python Scanning Integration', () => {
       fs.writeFileSync(reqPath, 'requests==2.31.0\nnumpy>=1.24.0\nflask>=2.0.0')
 
       process.chdir(testDir)
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       // Mock Python script output
       execSync.mockReturnValueOnce(JSON.stringify({
@@ -195,6 +208,9 @@ describe('Python Scanning Integration', () => {
       fs.writeFileSync(reqPath, 'requests==2.31.0\ngplpackage>=1.0.0')
 
       process.chdir(testDir)
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       // Mock Python script output
       execSync.mockReturnValueOnce(JSON.stringify({
@@ -218,6 +234,9 @@ describe('Python Scanning Integration', () => {
 
       process.chdir(testDir)
 
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
+
       // Mock Python script output
       execSync.mockReturnValueOnce(JSON.stringify({
         requests: 'Apache-2.0',
@@ -238,6 +257,9 @@ describe('Python Scanning Integration', () => {
       fs.writeFileSync(reqPath, 'flask==2.0.0')
 
       process.chdir(testDir)
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       // Mock Python script returning non-normalized license
       execSync.mockReturnValueOnce(JSON.stringify({
@@ -271,6 +293,9 @@ describe('Python Scanning Integration', () => {
       )
 
       process.chdir(testDir)
+
+      // Mock Python command detection (python3 --version)
+      execSync.mockReturnValueOnce('Python 3.10.0')
 
       // Only requests should be scanned
       execSync.mockReturnValueOnce(JSON.stringify({

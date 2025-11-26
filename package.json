@@ -1,9 +1,9 @@
 {
   "name": "licenseguard-cli",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "License setup & compliance guard for developers",
   "bin": {
-    "licenseguard": "./bin/licenseguard.js"
+    "licenseguard": "bin/licenseguard.js"
   },
   "directories": {
     "doc": "docs"
