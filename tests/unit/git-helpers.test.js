@@ -16,7 +16,7 @@ jest.mock('child_process', () => ({
   execSync: jest.fn(),
 }))
 
-const { isGitRepo, initGitRepo, installHooks } = require('../../lib/utils/git-helpers')
+const { isGitRepo, initGitRepo, installHooks, isEsmProject, generatePostCheckoutScript, generatePreCommitScript, generatePostCheckoutScriptEsm, generatePreCommitScriptEsm } = require('../../lib/utils/git-helpers')
 
 describe('git-helpers', () => {
   let existsSyncSpy
@@ -285,6 +285,192 @@ describe('git-helpers', () => {
 
       // Should still succeed even if chmod fails (Windows)
       expect(result).toBe(true)
+    })
+  })
+
+  describe('isEsmProject', () => {
+    let readFileSyncSpy
+
+    afterEach(() => {
+      if (readFileSyncSpy) readFileSyncSpy.mockRestore()
+    })
+
+    it('returns true when package.json has "type": "module"', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return true
+        return false
+      })
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockReturnValue(
+        JSON.stringify({ type: 'module' })
+      )
+
+      const result = isEsmProject()
+
+      expect(result).toBe(true)
+    })
+
+    it('returns false when package.json has no type field', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return true
+        return false
+      })
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockReturnValue(
+        JSON.stringify({ name: 'test' })
+      )
+
+      const result = isEsmProject()
+
+      expect(result).toBe(false)
+    })
+
+    it('returns false when package.json has "type": "commonjs"', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return true
+        return false
+      })
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockReturnValue(
+        JSON.stringify({ type: 'commonjs' })
+      )
+
+      const result = isEsmProject()
+
+      expect(result).toBe(false)
+    })
+
+    it('returns false when no package.json exists', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false)
+
+      const result = isEsmProject()
+
+      expect(result).toBe(false)
+    })
+
+    it('returns false when readFileSync throws error', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return true
+        return false
+      })
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+        throw new Error('Permission denied')
+      })
+
+      const result = isEsmProject()
+
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('installHooks ESM support', () => {
+    beforeEach(() => {
+      mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation(() => {})
+      writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      chmodSyncSpy = jest.spyOn(fs, 'chmodSync').mockImplementation(() => {})
+    })
+
+    it('generates ESM hook when project is ESM', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return true
+        if (filePath === '.git/hooks') return true
+        if (filePath === path.join('.git', 'hooks', 'post-checkout')) return false
+        if (filePath === path.join('.git', 'hooks', 'pre-commit')) return false
+        return false
+      })
+      const readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return JSON.stringify({ type: 'module' })
+        return ''
+      })
+
+      const result = installHooks()
+
+      expect(result).toBe(true)
+
+      // Check that post-checkout hook uses ESM syntax
+      const postCheckoutCall = writeFileSyncSpy.mock.calls.find(
+        call => call[0] === path.join('.git', 'hooks', 'post-checkout')
+      )
+      const postCheckoutHook = postCheckoutCall[1]
+      expect(postCheckoutHook).toContain('import')
+      expect(postCheckoutHook).not.toContain('require(')
+
+      // Check that pre-commit hook uses ESM syntax
+      const preCommitCall = writeFileSyncSpy.mock.calls.find(
+        call => call[0] === path.join('.git', 'hooks', 'pre-commit')
+      )
+      const preCommitHook = preCommitCall[1]
+      expect(preCommitHook).toContain('import')
+      expect(preCommitHook).not.toContain('require(')
+
+      readFileSyncSpy.mockRestore()
+    })
+
+    it('generates CJS hook when project is CJS', () => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return true
+        if (filePath === '.git/hooks') return true
+        if (filePath === path.join('.git', 'hooks', 'post-checkout')) return false
+        if (filePath === path.join('.git', 'hooks', 'pre-commit')) return false
+        return false
+      })
+      const readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockImplementation((filePath) => {
+        if (filePath === 'package.json') return JSON.stringify({ name: 'test' })
+        return ''
+      })
+
+      const result = installHooks()
+
+      expect(result).toBe(true)
+
+      // Check that post-checkout hook uses CJS syntax
+      const postCheckoutCall = writeFileSyncSpy.mock.calls.find(
+        call => call[0] === path.join('.git', 'hooks', 'post-checkout')
+      )
+      const postCheckoutHook = postCheckoutCall[1]
+      expect(postCheckoutHook).toContain('require(')
+
+      // Check that pre-commit hook uses CJS syntax
+      const preCommitCall = writeFileSyncSpy.mock.calls.find(
+        call => call[0] === path.join('.git', 'hooks', 'pre-commit')
+      )
+      const preCommitHook = preCommitCall[1]
+      expect(preCommitHook).toContain('require(')
+
+      readFileSyncSpy.mockRestore()
+    })
+  })
+
+  describe('generatePostCheckoutScript', () => {
+    it('returns CJS script with require', () => {
+      const script = generatePostCheckoutScript()
+      expect(script).toContain('require(')
+      expect(script).not.toContain('import')
+    })
+  })
+
+  describe('generatePreCommitScript', () => {
+    it('returns CJS script with require', () => {
+      const script = generatePreCommitScript()
+      expect(script).toContain('require(')
+      expect(script).not.toContain('import')
+    })
+  })
+
+  describe('generatePostCheckoutScriptEsm', () => {
+    it('returns ESM script with import', () => {
+      const script = generatePostCheckoutScriptEsm()
+      expect(script).toContain('import')
+      expect(script).not.toContain('require(')
+      expect(script).toContain('fileURLToPath')
+      expect(script).toContain('import.meta.url')
+    })
+  })
+
+  describe('generatePreCommitScriptEsm', () => {
+    it('returns ESM script with import', () => {
+      const script = generatePreCommitScriptEsm()
+      expect(script).toContain('import')
+      expect(script).not.toContain('require(')
+      expect(script).toContain('fileURLToPath')
+      expect(script).toContain('import.meta.url')
     })
   })
 })
