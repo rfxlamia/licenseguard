@@ -1,0 +1,17 @@
+{
+  "nextId": 2,
+  "tasks": [
+    {
+      "id": "1",
+      "subject": "Verifikasi override sprintf-js yang aman",
+      "description": "Memeriksa advisori dan versi registry sebelum mempertahankan npm override. Advisory mencakup semua versi yang tersedia (<=1.1.3), sehingga override yang dicoba tidak menyelesaikan audit dan telah dihapus.",
+      "status": "completed",
+      "activeForm": "Menambahkan override dan memverifikasi",
+      "metadata": {},
+      "blocks": [],
+      "blockedBy": [],
+      "createdAt": 1791294083721,
+      "updatedAt": 1791294207488
+    }
+  ]
+}
