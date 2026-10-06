@@ -1,4 +1,6 @@
-const { execSync } = require('child_process')
+const { execFileSync, execSync } = require('child_process')
+const fs = require('fs')
+const path = require('path')
 const {
   traceDependencyPath,
   formatPathChain,
@@ -7,13 +9,20 @@ const {
 
 // Mock child_process
 jest.mock('child_process')
+const platformDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')
 
 describe('Path Tracer - npm explain Adapter', () => {
   beforeEach(() => {
     // Clear cache before each test
     clearCache()
     // Clear all mocks
-    jest.clearAllMocks()
+    jest.resetAllMocks()
+    Object.defineProperty(process, 'platform', { ...platformDescriptor, value: 'linux', writable: true })
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    Object.defineProperty(process, 'platform', platformDescriptor)
   })
 
   describe('formatPathChain', () => {
@@ -62,24 +71,94 @@ describe('Path Tracer - npm explain Adapter', () => {
         { path: 'app > folly > liburing' }
       ])
 
-      execSync.mockReturnValue(mockOutput)
+      execFileSync.mockReturnValue(mockOutput)
 
       const result = traceDependencyPath('liburing', '/path/to/project')
 
-      expect(execSync).toHaveBeenCalledWith(
-        'npm explain liburing --json',
+      expect(execFileSync).toHaveBeenCalledWith(
+        'npm',
+        ['explain', 'liburing', '--json'],
         expect.objectContaining({
           cwd: '/path/to/project',
           encoding: 'utf8',
-          timeout: 5000
+          stdio: ['pipe', 'pipe', 'pipe'],
+          timeout: 5000,
+          shell: false
         })
       )
 
       expect(result).toBe('app → folly → liburing')
     })
 
+    test.each([
+      'chalk@4.1.2',
+      '@babel/core',
+      '@babel/core@7.0.0',
+      'not-a-real-package; printf verified; #',
+      'package with spaces',
+      'package"quoted\'name',
+      'package | printf verified',
+      'package`printf verified`',
+      'package$(printf verified)'
+    ])('passes %s as one literal argument without a shell', (packageName) => {
+      execFileSync.mockReturnValue(JSON.stringify([{ path: 'app > dependency' }]))
+
+      const result = traceDependencyPath(packageName, '/path/to/project')
+
+      expect(execFileSync).toHaveBeenCalledWith(
+        'npm',
+        ['explain', packageName, '--json'],
+        expect.objectContaining({ shell: false })
+      )
+      expect(execSync).not.toHaveBeenCalled()
+      expect(result).toBe('app → dependency')
+    })
+
+    test('launches the npm JavaScript CLI through Node on Windows', () => {
+      jest.replaceProperty(process, 'platform', 'win32')
+      jest.replaceProperty(process, 'env', { PATH: '' })
+      const npmCli = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js')
+      jest.spyOn(fs, 'existsSync').mockImplementation((file) => file === npmCli)
+      execFileSync.mockReturnValue(JSON.stringify([{ path: 'app > chalk' }]))
+
+      const result = traceDependencyPath('chalk; printf verified', '/path/to/project')
+
+      expect(execFileSync).toHaveBeenCalledWith(
+        process.execPath,
+        [npmCli, 'explain', 'chalk; printf verified', '--json'],
+        expect.objectContaining({ shell: false, cwd: '/path/to/project', timeout: 5000 })
+      )
+      expect(execSync).not.toHaveBeenCalled()
+      expect(result).toBe('app → chalk')
+    })
+
+    test('finds npm alongside its Windows PATH wrapper', () => {
+      jest.replaceProperty(process, 'platform', 'win32')
+      jest.replaceProperty(process, 'env', { Path: ['other-directory', 'npm-directory'].join(path.delimiter) })
+      const npmCli = path.resolve('npm-directory', 'node_modules', 'npm', 'bin', 'npm-cli.js')
+      jest.spyOn(fs, 'existsSync').mockImplementation((file) => file === npmCli)
+      execFileSync.mockReturnValue(JSON.stringify([{ path: 'app > chalk' }]))
+
+      expect(traceDependencyPath('chalk', '/path/to/project')).toBe('app → chalk')
+      expect(execFileSync).toHaveBeenCalledWith(
+        process.execPath,
+        [npmCli, 'explain', 'chalk', '--json'],
+        expect.objectContaining({ shell: false })
+      )
+    })
+
+    test('returns null without a shell fallback when the Windows npm CLI is missing', () => {
+      jest.replaceProperty(process, 'platform', 'win32')
+      jest.replaceProperty(process, 'env', { PATH: '' })
+      jest.spyOn(fs, 'existsSync').mockReturnValue(false)
+
+      expect(traceDependencyPath('chalk', '/path/to/project')).toBeNull()
+      expect(execFileSync).not.toHaveBeenCalled()
+      expect(execSync).not.toHaveBeenCalled()
+    })
+
     test('returns null when npm explain returns empty array', () => {
-      execSync.mockReturnValue(JSON.stringify([]))
+      execFileSync.mockReturnValue(JSON.stringify([]))
 
       const result = traceDependencyPath('unknown-package', '/path/to/project')
 
@@ -87,7 +166,7 @@ describe('Path Tracer - npm explain Adapter', () => {
     })
 
     test('returns null when npm explain fails', () => {
-      execSync.mockImplementation(() => {
+      execFileSync.mockImplementation(() => {
         throw new Error('npm not found')
       })
 
@@ -97,7 +176,7 @@ describe('Path Tracer - npm explain Adapter', () => {
     })
 
     test('returns null when JSON parsing fails', () => {
-      execSync.mockReturnValue('invalid json')
+      execFileSync.mockReturnValue('invalid json')
 
       const result = traceDependencyPath('chalk', '/path/to/project')
 
@@ -110,7 +189,7 @@ describe('Path Tracer - npm explain Adapter', () => {
         { path: 'app > vue > chalk' }
       ])
 
-      execSync.mockReturnValue(mockOutput)
+      execFileSync.mockReturnValue(mockOutput)
 
       const result = traceDependencyPath('chalk', '/path/to/project')
 
@@ -122,25 +201,25 @@ describe('Path Tracer - npm explain Adapter', () => {
         { path: 'app > folly > liburing' }
       ])
 
-      execSync.mockReturnValue(mockOutput)
+      execFileSync.mockReturnValue(mockOutput)
 
       // First call - should execute npm explain
       const result1 = traceDependencyPath('liburing', '/path/to/project')
-      expect(execSync).toHaveBeenCalledTimes(1)
+      expect(execFileSync).toHaveBeenCalledTimes(1)
       expect(result1).toBe('app → folly → liburing')
 
       // Second call - should use cache
       const result2 = traceDependencyPath('liburing', '/path/to/project')
-      expect(execSync).toHaveBeenCalledTimes(1) // Still 1, not called again
+      expect(execFileSync).toHaveBeenCalledTimes(1) // Still 1, not called again
       expect(result2).toBe('app → folly → liburing')
     })
 
     test('different packages get different cache entries', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('chalk')) {
+      execFileSync.mockImplementation((_file, args) => {
+        if (args[1] === 'chalk') {
           return JSON.stringify([{ path: 'app > react > chalk' }])
         }
-        if (cmd.includes('commander')) {
+        if (args[1] === 'commander') {
           return JSON.stringify([{ path: 'app > commander' }])
         }
         return JSON.stringify([])
@@ -151,7 +230,7 @@ describe('Path Tracer - npm explain Adapter', () => {
 
       expect(result1).toBe('app → react → chalk')
       expect(result2).toBe('app → commander')
-      expect(execSync).toHaveBeenCalledTimes(2)
+      expect(execFileSync).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -161,18 +240,18 @@ describe('Path Tracer - npm explain Adapter', () => {
         { path: 'app > chalk' }
       ])
 
-      execSync.mockReturnValue(mockOutput)
+      execFileSync.mockReturnValue(mockOutput)
 
       // First call - populate cache
       traceDependencyPath('chalk', '/path/to/project')
-      expect(execSync).toHaveBeenCalledTimes(1)
+      expect(execFileSync).toHaveBeenCalledTimes(1)
 
       // Clear cache
       clearCache()
 
       // Second call - should execute again (not cached)
       traceDependencyPath('chalk', '/path/to/project')
-      expect(execSync).toHaveBeenCalledTimes(2)
+      expect(execFileSync).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -180,7 +259,7 @@ describe('Path Tracer - npm explain Adapter', () => {
     test('handles ENOENT error (npm not in PATH)', () => {
       const error = new Error('spawn npm ENOENT')
       error.code = 'ENOENT'
-      execSync.mockImplementation(() => { throw error })
+      execFileSync.mockImplementation(() => { throw error })
 
       const result = traceDependencyPath('chalk', '/path/to/project')
 
@@ -190,7 +269,7 @@ describe('Path Tracer - npm explain Adapter', () => {
     test('handles timeout error', () => {
       const error = new Error('Command timed out')
       error.killed = true
-      execSync.mockImplementation(() => { throw error })
+      execFileSync.mockImplementation(() => { throw error })
 
       const result = traceDependencyPath('chalk', '/path/to/project')
 
@@ -198,7 +277,7 @@ describe('Path Tracer - npm explain Adapter', () => {
     })
 
     test('handles npm explain returning null', () => {
-      execSync.mockReturnValue('null')
+      execFileSync.mockReturnValue('null')
 
       const result = traceDependencyPath('chalk', '/path/to/project')
 
