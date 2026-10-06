@@ -13,3 +13,7 @@ coverage/
 .prettierrc
 jest.config.js
 .licenseguardrc
+
+# coding agents
+.pi
+.claude
