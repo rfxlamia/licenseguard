@@ -771,6 +771,81 @@ describe('checkWithMatrix (Matrix-Based Compatibility)', () => {
 })
 
 describe('explainCompatibility (--explain flag support)', () => {
+  it.each([
+    ['Apache-2.0', 'GPL-3.0-only', false],
+    ['Apache-2.0', 'GPL-3.0', false],
+    ['Apache-2.0', 'GPL-3.0-or-later', false],
+    ['GPL-3.0-only', 'Apache-2.0', true],
+    ['GPL-3.0-or-later', 'Apache-2.0', true],
+    ['Apache-2.0', 'MIT OR GPL-3.0-only', true],
+    ['Apache-2.0', 'GPL-3.0-only OR MIT', true],
+    ['Apache-2.0', 'MIT AND GPL-3.0-only', false],
+    ['Apache-2.0', '(MIT OR GPL-3.0-only) AND BSD-3-Clause', true],
+    ['Apache-2.0', '(MIT AND GPL-3.0-only) OR GPL-2.0-only', false],
+    ['MIT', 'WTFPL', true],
+    ['MIT', 'wtfpl', true],
+    ['MIT', 'MIT', true],
+    ['MIT', 'UNKNOWN', false],
+    ['MIT', '', false],
+    ['MIT', null, false],
+    ['MIT', undefined, false],
+    ['MIT', '((MIT', false],
+    ['MIT', 'not-a-license', false]
+  ])('agrees with scan for project %s and dependency %s', (project, dependency, compatible) => {
+    const result = checkCompatibility(project, dependency)
+    const explanation = explainCompatibility(project, dependency)
+
+    expect(result.compatible).toBe(compatible)
+    expect(explanation.startsWith(compatible ? '✅ Compatible: ' : '❌ Incompatible: ')).toBe(true)
+    expect(explanation.split('\n')[0]).toBe(`${compatible ? '✅ Compatible' : '❌ Incompatible'}: ${result.reason}`)
+  })
+
+  it('cites the direction of Apache/GPL compatibility when rejecting GPLv3', () => {
+    const result = checkWithMatrix('Apache-2.0', 'GPL-3.0-only')
+    const explanation = explainCompatibility('Apache-2.0', 'GPL-3.0-only')
+
+    expect(result.compatible).toBe(false)
+    expect(result.severity).toBe('ERROR')
+    expect(explanation).toContain('GPLv3 software cannot be included in Apache-2.0 projects')
+    expect(explanation).toContain('https://www.apache.org/licenses/GPL-compatibility.html')
+  })
+
+  it('retains the failing AND branch citation', () => {
+    const explanation = explainCompatibility('Apache-2.0', 'MIT AND GPL-3.0-only')
+    expect(explanation).toContain('Part of AND expression failed')
+    expect(explanation).toContain('GPLv3 software cannot be included in Apache-2.0 projects')
+    expect(explanation).toContain('https://www.apache.org/licenses/GPL-compatibility.html')
+  })
+
+  it('uses the selected OR branch instead of a rejected branch citation', () => {
+    const explanation = explainCompatibility('Apache-2.0', 'GPL-3.0-only OR MIT')
+    expect(explanation).toContain('Both permissive licenses')
+    expect(explanation).not.toContain('GPLv3 software cannot be included')
+  })
+
+  it('cites the selected MIT dependency instead of the rejected Apache dependency', () => {
+    const explanation = explainCompatibility('GPL-2.0-only', 'MIT OR Apache-2.0')
+    expect(explanation).toContain('✅ Compatible: Permissive dependency compatible with copyleft project')
+    expect(explanation).toContain('FSF: MIT license is permissive and GPL-compatible')
+    expect(explanation).toContain('https://www.gnu.org/licenses/license-list.html#Expat')
+    expect(explanation).not.toContain('GPL-2.0 incompatible with Apache-2.0')
+  })
+
+  it('does not attach a single branch citation to an aggregate AND success', () => {
+    const explanation = explainCompatibility('GPL-3.0-only', 'MIT AND Apache-2.0')
+    expect(explanation).toContain('✅ Compatible: All licenses in AND expression are compatible')
+    expect(explanation).not.toContain('📚 Source:')
+  })
+
+  it.each(['MIT', 'MIT AND BSD-3-Clause', 'MIT OR GPL-3.0-only'])('preserves fallback warnings for %s', (dependency) => {
+    const result = checkCompatibility('Unknown-License', dependency)
+    const explanation = explainCompatibility('Unknown-License', dependency)
+    expect(result.compatible).toBe(true)
+    expect(explanation.startsWith('⚠️  Warning: ')).toBe(true)
+    expect(explanation).toContain(result.reason)
+    expect(explanation).not.toContain('📚 Source:')
+  })
+
   it('should format compatible result with checkmark', () => {
     const explanation = explainCompatibility('GPL-3.0-only', 'MIT')
     expect(explanation).toContain('✅')
