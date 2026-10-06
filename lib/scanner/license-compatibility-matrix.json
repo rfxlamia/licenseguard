@@ -1,8 +1,8 @@
 {
-  "version": "1.0.0",
-  "last_updated": "2025-11-22",
+  "version": "1.0.1",
+  "last_updated": "2026-10-06",
   "description": "Authoritative license compatibility matrix for top 20 open source licenses covering ~95% of packages",
-  "methodology": "Based on FSF GPL Compatibility List, Mozilla MPL FAQ, Apache Foundation guidance, and SPDX specifications",
+  "methodology": "Directional dependency compatibility while retaining the project license; based on FSF GPL Compatibility List, Mozilla MPL FAQ, Apache Foundation guidance, and SPDX specifications",
 
   "sources": {
     "fsf_gpl_compat": {
@@ -52,14 +52,14 @@
     "Apache-2.0": {
       "type": "permissive-with-patent-grant",
       "description": "Permissive license with explicit patent grant",
-      "compatible_with": ["*permissive*", "GPL-3.0-only", "GPL-3.0-or-later"],
-      "incompatible_with": ["GPL-2.0-only", "GPL-2.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later"],
+      "compatible_with": ["*permissive*"],
+      "incompatible_with": ["GPL-3.0-only", "GPL-3.0-or-later", "GPL-2.0-only", "GPL-2.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later"],
       "can_upgrade_from": [],
       "sources": {
-        "citation": "Apache 2.0 patent clause incompatible with GPL-2.0, but compatible with GPL-3.0",
+        "citation": "Apache Software Foundation: GPLv3 software cannot be included in Apache-2.0 projects while retaining Apache-2.0; Apache-2.0 software can be included in GPLv3 projects. Apache-2.0 is incompatible with GPLv2.",
         "url": "https://www.apache.org/licenses/GPL-compatibility.html"
       },
-      "reasoning": "Apache 2.0's patent grant conflicts with GPLv2 section 6, but GPLv3 was designed to resolve this"
+      "reasoning": "Compatibility is directional: GPLv3 accepts Apache-2.0 dependencies, but incorporating GPLv3 code into a derivative work requires GPLv3 distribution, which does not preserve the Apache-2.0 project license. Apache-2.0 also conflicts with GPLv2."
     },
 
     "BSD-3-Clause": {

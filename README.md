@@ -189,14 +189,19 @@ Fix conflicts or use --force to proceed anyway:
 ```
 
 ### `init --explain` - With Explanation
+
+Compatibility is directional and checks whether dependencies can be used while
+retaining the selected project license. For example, an Apache-2.0 project rejects
+a GPLv3 dependency, while a GPLv3 project can accept an Apache-2.0 dependency.
+LicenseGuard does not assume automatic relicensing of the project. Scan verdicts
+and `--explain` reasons and citations use the same policy evaluation.
+
 ```bash
 licenseguard init --explain
 # ...
 # ❌ libdwarf@0.9.1 (LGPL-2.1-only)
 #    Conflict: Copyleft incompatible with MIT
-#    ────────────────────────
-#    📚 FSF: MIT license is permissive and GPL-compatible
-#    🔗 https://www.gnu.org/licenses/license-list.html#Expat
+# Sources are shown when they support the deciding policy rule.
 ```
 
 **Flags:**
