@@ -127,7 +127,7 @@ describe('checkCompatibility', () => {
       // MIT is permissive, so compatible
       const result = checkCompatibility('not-a-license', 'MIT')
       expect(result.compatible).toBe(true)
-      expect(result.reason).toBe('Both permissive licenses')
+      expect(result.reason).toBe('Both permissive licenses (Unknown project license (not-a-license) - unable to verify compatibility)')
     })
   })
 
@@ -771,6 +771,64 @@ describe('checkWithMatrix (Matrix-Based Compatibility)', () => {
 })
 
 describe('explainCompatibility (--explain flag support)', () => {
+  it.each(['GPL-2.0-only', 'GPL-2.0-or-later'])('cites the documented Apache rejection of %s', (dependency) => {
+    const explanation = explainCompatibility('Apache-2.0', dependency)
+    expect(explanation).toContain('❌ Incompatible:')
+    expect(explanation).toContain('Apache-2.0 is incompatible with GPLv2')
+    expect(explanation).toContain('https://www.apache.org/licenses/GPL-compatibility.html')
+  })
+
+  it.each(['AGPL-3.0-only', 'AGPL-3.0-or-later', 'LGPL-3.0-only', 'LGPL-3.0-or-later', 'MPL-2.0', 'EPL-2.0'])('rejects Apache copyleft dependency %s through both APIs', (dependency) => {
+    expect(checkWithMatrix('Apache-2.0', dependency)).toMatchObject({ compatible: false, severity: 'ERROR' })
+    expect(checkCompatibility('Apache-2.0', dependency).compatible).toBe(false)
+    // A GPL-specific citation does not establish rules for other license families.
+    expect(explainCompatibility('Apache-2.0', dependency)).not.toContain('📚 Source:')
+  })
+
+  it.each(['LGPL-2.1-only', 'MPL-2.0'])('does not attach a GPL citation to the matrix rejection of %s', (dependency) => {
+    expect(checkWithMatrix('Apache-2.0', dependency)).toMatchObject({ compatible: false, source: null })
+  })
+
+  it.each([5, true, {}, [], { type: 'MIT' }])('rejects non-string license %p without throwing', (dependency) => {
+    expect(checkCompatibility('MIT', dependency)).toEqual({ compatible: false, reason: 'No license field found' })
+    expect(explainCompatibility('MIT', dependency)).toBe('❌ Incompatible: No license field found')
+  })
+
+  it.each([
+    ['EPL-2.0', 'Zlib', 'unable to verify compatibility'],
+    ['Unknown-License', 'MIT', 'unable to verify compatibility'],
+    ['GPL-3.0-only', 'Python-2.0', 'verify manually'],
+    ['GPL-3.0-only', 'Python-2.0 AND MIT', 'verify manually']
+  ])('retains the warning caveat for %s with %s', (project, dependency, caveat) => {
+    const result = checkCompatibility(project, dependency)
+    const explanation = explainCompatibility(project, dependency)
+    expect(result.compatible).toBe(true)
+    expect(result.reason).toContain(caveat)
+    expect(explanation).toContain(`⚠️  Warning: ${result.reason}`)
+  })
+
+  it.each(['LGPL-3.0-only', 'MPL-2.0', 'AGPL-3.0-only'])('cites accepted MIT terms in %s projects', (project) => {
+    const explanation = explainCompatibility(project, 'MIT')
+    expect(explanation).toContain('✅ Compatible:')
+    expect(explanation).toContain('FSF: MIT license is permissive and GPL-compatible')
+    expect(explanation).toContain('https://www.gnu.org/licenses/license-list.html#Expat')
+  })
+
+  it('cites the GPLv3 upgrade choice for GPLv2-or-later accepting Apache', () => {
+    const explanation = explainCompatibility('GPL-2.0-or-later', 'Apache-2.0')
+    expect(explanation).toContain('✅ Compatible:')
+    expect(explanation).toContain('GPL-2.0-or-later can upgrade to GPL-3.0')
+    expect(explanation).toContain('https://www.gnu.org/licenses/gpl-faq.html#v2v3Compatibility')
+  })
+
+  it('preserves the agreed first-compatible OR selection including warnings', () => {
+    const explanation = explainCompatibility('GPL-3.0-only', 'Python-2.0 OR MIT')
+    expect(explanation).toContain('⚠️  Warning:')
+    expect(explanation).toContain('Python-2.0')
+    expect(explanation).toContain('verify manually')
+    expect(explanation).not.toContain('FSF: MIT')
+  })
+
   it.each([
     ['Apache-2.0', 'GPL-3.0-only', false],
     ['Apache-2.0', 'GPL-3.0', false],
