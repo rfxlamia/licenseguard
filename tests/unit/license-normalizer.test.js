@@ -340,6 +340,23 @@ describe('License Normalizer', () => {
       })
     })
 
+    describe('Regex copyleft variants', () => {
+      it.each([
+        ['LGPL version 3', 'LGPL-3.0-only'],
+        ['LGPL version 3 or later', 'LGPL-3.0-or-later'],
+        ['LGPL version 2.1', 'LGPL-2.1-only'],
+        ['LGPL version 2.1 or later', 'LGPL-2.1-or-later'],
+        ['AGPL version 3', 'AGPL-3.0-only'],
+        ['AGPL version 3 or later', 'AGPL-3.0-or-later'],
+        ['GPL version 3', 'GPL-3.0-only'],
+        ['GPL version 3 or later', 'GPL-3.0-or-later'],
+        ['GPL version 2', 'GPL-2.0-only'],
+        ['GPL version 2 or later', 'GPL-2.0-or-later'],
+      ])('normalizes %s to %s without confusing copyleft families', (input, expected) => {
+        expect(normalize(input)).toBe(expected)
+      })
+    })
+
     describe('Already Valid SPDX', () => {
       it('should keep GPL-3.0-only as is (canonical form)', () => {
         expect(normalize('GPL-3.0-only')).toBe('GPL-3.0-only')

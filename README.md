@@ -484,7 +484,7 @@ Contributions welcome!
 2. Check [GitHub Issues](https://github.com/rfxlamia/licenseguard-development/issues) for "good first issue" label
 3. Fork repository
 4. Create branch: `git checkout -b feat/license-mpl2`
-5. Write tests (90%+ coverage required)
+5. Write tests and run `npm run test:coverage` (current minimums: 87% statements, 79% branches, 88% lines; target: 90% for each). See [CONTRIBUTING.md](CONTRIBUTING.md) for the coverage policy.
 6. Submit Pull Request
 
 **Philosophy:**

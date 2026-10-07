@@ -50,8 +50,11 @@ Before you write a single line of code, please understand the core values that b
 
 *   **Branch Naming:** `feat/feature-name` or `fix/bug-name`.
 *   **Commit Messages:** Follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat: add ruby support`, `fix: handle corrupt lockfile`).
-*   **Tests:** Every PR **MUST** include unit tests. Code coverage should not drop below 90%.
+*   **Tests:** Every PR **MUST** include tests for its behavior changes. Global Jest coverage must meet the current minimums: **87% statements, 79% branches, and 88% lines**. CI enforces each metric through `npm run test:coverage`.
+*   **Coverage target:** Raise statements, branches, and lines toward **90% each**, incrementally. Add tests for uncovered behavior, verify the full suite across the CI matrix, and raise `jest.coverageThreshold.global` in `package.json` in the same PR when the improvement supports it. Do not lower thresholds or exclude application code to make the gate pass. Function coverage is reported but has no enforced minimum yet.
 *   **Documentation:** Update `README.md` if you add a new feature or flag.
+
+Run `npm run test:coverage` before submitting a PR. Run `npm run test:coverage:gate` to prove that fully covered code passes and insufficient coverage fails separately for each enforced metric. This check uses temporary fixtures outside the application coverage report and runs once in CI.
 
 ## Adding a New Ecosystem Plugin
 
