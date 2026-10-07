@@ -46,3 +46,7 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+
+      - name: Verify coverage thresholds reject insufficient coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
+        run: npm run test:coverage:gate

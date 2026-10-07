@@ -12,9 +12,19 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:coverage:gate": "node tests/utils/check-coverage-gate.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "postinstall": "node lib/postinstall.js"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 87,
+        "branches": 79,
+        "lines": 88
+      }
+    }
   },
   "keywords": [
     "license",
