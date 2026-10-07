@@ -200,7 +200,7 @@ and `--explain` reasons and citations use the same policy evaluation.
 licenseguard init --explain
 # ...
 # ❌ libdwarf@0.9.1 (LGPL-2.1-only)
-#    Conflict: Copyleft incompatible with MIT
+#    Copyleft license LGPL-2.1-only incompatible with permissive MIT
 # Sources are shown when they support the deciding policy rule.
 ```
 
