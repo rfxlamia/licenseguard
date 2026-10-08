@@ -8,12 +8,14 @@ describe('scan project license detection', () => {
   let originalCwd
   let tempDir
   let logSpy
+  let warnSpy
 
   beforeEach(() => {
     originalCwd = process.cwd()
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'licenseguard-license-detection-'))
     process.chdir(tempDir)
     logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
     fs.writeFileSync('.licenseguardrc', '{}')
     fs.writeFileSync('package.json', JSON.stringify({ name: 'fixture', license: 'ISC', dependencies: {} }))
   })
@@ -46,6 +48,7 @@ describe('scan project license detection', () => {
     fs.writeFileSync('.licenseguardrc', '{broken')
     fs.writeFileSync('LICENSE', LICENSE_TEMPLATES.mit)
     await expectDetectedLicense('MIT')
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Could not read .licenseguardrc'))
   })
 
   test('unrecognized LICENSE falls back to package metadata', async () => {
@@ -56,6 +59,7 @@ describe('scan project license detection', () => {
   test('malformed configuration falls back to package metadata when LICENSE is absent', async () => {
     fs.writeFileSync('.licenseguardrc', '{broken')
     await expectDetectedLicense('ISC')
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Could not read .licenseguardrc'))
   })
 
   test.each(['{broken', JSON.stringify({ name: 'fixture' })])(
