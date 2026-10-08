@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { execSync } = require('child_process')
+const { execFileSync } = require('child_process')
 const os = require('os')
 
 // Mock chalk to avoid ANSI codes in test output
@@ -107,11 +107,11 @@ describe('ESM project hooks integration', () => {
     // Verify hooks can run without error
     // Using stdio: 'pipe' to capture any error output
     expect(() => {
-      execSync(postCheckoutPath, { cwd: tempDir, stdio: 'pipe' })
+      execFileSync(process.execPath, [postCheckoutPath], { cwd: tempDir, stdio: 'pipe' })
     }).not.toThrow()
 
     expect(() => {
-      execSync(preCommitPath, { cwd: tempDir, stdio: 'pipe' })
+      execFileSync(process.execPath, [preCommitPath], { cwd: tempDir, stdio: 'pipe' })
     }).not.toThrow()
   })
 
@@ -122,7 +122,7 @@ describe('ESM project hooks integration', () => {
     const postCheckoutPath = path.join(tempDir, '.git', 'hooks', 'post-checkout')
 
     // Run hook and capture output
-    const output = execSync(postCheckoutPath, { cwd: tempDir, encoding: 'utf8' })
+    const output = execFileSync(process.execPath, [postCheckoutPath], { cwd: tempDir, encoding: 'utf8' })
 
     // Verify output contains expected license notification
     expect(output).toContain('MIT')
@@ -140,11 +140,11 @@ describe('ESM project hooks integration', () => {
 
     // Hook should exit silently (exit code 0) when no config
     expect(() => {
-      execSync(postCheckoutPath, { cwd: tempDir, stdio: 'pipe' })
+      execFileSync(process.execPath, [postCheckoutPath], { cwd: tempDir, stdio: 'pipe' })
     }).not.toThrow()
 
     // No output expected when config is missing
-    const output = execSync(postCheckoutPath, { cwd: tempDir, encoding: 'utf8' })
+    const output = execFileSync(process.execPath, [postCheckoutPath], { cwd: tempDir, encoding: 'utf8' })
     expect(output).toBe('')
   })
 

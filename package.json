@@ -11,13 +11,17 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
+    "pretest:coverage": "node tests/utils/check-application-coverage.js --prepare",
     "test:coverage": "jest --coverage",
+    "posttest:coverage": "node tests/utils/check-application-coverage.js",
     "test:coverage:gate": "node tests/utils/check-coverage-gate.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "postinstall": "node lib/postinstall.js"
   },
   "jest": {
+    "collectCoverageFrom": ["lib/**/*.js", "bin/**/*.js"],
+    "coverageReporters": ["json", "lcov", "text", "clover", "json-summary"],
     "coverageThreshold": {
       "global": {
         "statements": 87,

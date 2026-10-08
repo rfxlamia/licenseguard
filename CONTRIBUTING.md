@@ -54,7 +54,9 @@ Before you write a single line of code, please understand the core values that b
 *   **Coverage target:** Raise statements, branches, and lines toward **90% each**, incrementally. Add tests for uncovered behavior, verify the full suite across the CI matrix, and raise `jest.coverageThreshold.global` in `package.json` in the same PR when the improvement supports it. Do not lower thresholds or exclude application code to make the gate pass. Function coverage is reported but has no enforced minimum yet.
 *   **Documentation:** Update `README.md` if you add a new feature or flag.
 
-Run `npm run test:coverage` before submitting a PR. Run `npm run test:coverage:gate` to prove that fully covered code passes and insufficient coverage fails separately for each enforced metric. This check uses temporary fixtures outside the application coverage report and runs once in CI.
+Run `npm run test:coverage` before submitting a PR. It counts **every JavaScript file under `lib/` and `bin/`**, including files never imported by tests. Its lifecycle checks remove stale summaries before the run and reject empty reports, missing files, or files without instrumentation afterward. CI runs this command on Linux, macOS, and Windows.
+
+Run `npm run test:coverage:gate` to prove that fully covered code passes and insufficient coverage fails separately for each enforced metric. This additional check uses temporary fixtures outside the application coverage report and runs once in CI; application report validation runs on every matrix job.
 
 ## Adding a New Ecosystem Plugin
 
